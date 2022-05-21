@@ -150,7 +150,7 @@ class Voice {
     void updateControl() {
         // Set control register & data
         if (debug) Serial.printf("Updating control at %i with 0x%02X\n", VREG(CR), control);
-        hw->write(VREG(CR), control, "CR");
+        hw->write(VREG(CR), control, (char*)"CR");
     }
 
     void setPulseWidth(uint16_t pw, bool immediate = true) {

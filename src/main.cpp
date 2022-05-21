@@ -1,7 +1,12 @@
 #include "Arduino.h"
 
+#define ENABLE_SCREEN
+
+#include "display_ss.h"
+
 #include "sid6581.h"
 #include "ads.h"
+
 
 //#include "mtof.h"
 
@@ -24,6 +29,13 @@ void setup() {
 
     setup_ads();
 
+    #ifdef ENABLE_SCREEN
+      Serial.println("Setting up display..");
+      setup_display();
+      Serial.println("Display initialised!");
+      tft_print("hello", 0, 0);
+    #endif
+    
     Serial.println("exiting setup()");
 }
 
@@ -108,7 +120,6 @@ void adc_direct_freq_loop() {
     sid.voice[2].gateOn();
     sid.voice[2].setFrequency(freq);
   }
-  last_freq = freq;
 }
 
 void note_loop() {
@@ -166,6 +177,9 @@ void loop() {
   while(Serial.available()) {
     char i = Serial.read();
     Serial.println(i);
+    if (i=='d') {
+      tft_print("test?", random(40), random(10));
+    }
     if (i=='#') {
       sid.printStatus();
       return;
