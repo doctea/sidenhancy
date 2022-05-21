@@ -1,300 +1,13 @@
+#ifndef SID6581__INCLUDED
+#define SID6581__INCLUDED
+
 #include <Arduino.h>
+
+#include "hardware.h"
 
 #include "myfreqs.h"
 
-#define CHECK_BIT(var,pos) ((var) & (pos))
-
-
-// --------------------------------------------------------------------------
-// SID6581 CONTROL REGISTERS 
-// --------------------------------------------------------------------------
-/*#define SID6581_REG_F1LO 0
-#define SID6581_REG_F1HI 1
-#define SID6581_REG_P1LO 2
-#define SID6581_REG_P1HI 3
-#define SID6581_REG_CTL1 4
-#define SID6581_REG_AD1  5
-#define SID6581_REG_SR1  6
-#define SID6581_REG_F2LO 7
-#define SID6581_REG_F2HI 8
-#define SID6581_REG_P2LO 9
-#define SID6581_REG_P2HI 10
-#define SID6581_REG_CTL2 11
-#define SID6581_REG_AD2  12
-#define SID6581_REG_SR2  13
-#define SID6581_REG_F3LO 14
-#define SID6581_REG_F3HI 15
-#define SID6581_REG_P3LO 16 
-#define SID6581_REG_P3HI 17
-#define SID6581_REG_CTL3 18
-#define SID6581_REG_AD3  19
-#define SID6581_REG_SR3  20
-#define SID6581_REG_FCLO 21
-#define SID6581_REG_FCHI 22
-#define SID6581_REG_RFLT 23
-#define SID6581_REG_MVOL 24
-#define SID6581_REG_POTX 25
-#define SID6581_REG_POTY 26
-#define SID6581_REG_OSC3 27
-#define SID6581_REG_ENV3 28*/
-
-// --------------------------------------------------------------------------
-// SID6581 VOICE CONTROL REGISTER BITMASK
-// --------------------------------------------------------------------------
-#define SID6581_MASK_OFF 0
-#define SID6581_MASK_GATE 1
-#define SID6581_MASK_SYNC 2
-#define SID6581_MASK_RING 4
-#define SID6581_MASK_TEST 8
-#define SID6581_MASK_TRIANGLE 16
-#define SID6581_MASK_SAWTOOTH 32
-#define SID6581_MASK_SQUARE 64
-#define SID6581_MASK_NOISE 128
-
-#define SID6581_MASK_FLT_V1 1
-#define SID6581_MASK_FLT_V2 2
-#define SID6581_MASK_FLT_V3 4
-#define SID6581_MASK_FLT_EXT 8
-
-#define SID6581_MASK_FLT_MUTEV3 128
-#define SID6581_MASK_FLT_HP 64
-#define SID6581_MASK_FLT_BP 32
-#define SID6581_MASK_FLT_LP 16
-
-
-// implement stuff for actually reading/writing to the chip - so can "easily" rewire it
-class Socket {
-    public:
-
-    bool debug = false;
-
-    // use PORTA for data bus
-    #define SID6581_PIN_D0  PIN_PA7
-    #define SID6581_PIN_D1  PIN_PA6
-    #define SID6581_PIN_D2  PIN_PA5
-    #define SID6581_PIN_D3  PIN_PA4
-    #define SID6581_PIN_D4  PIN_PA3
-    #define SID6581_PIN_D5  PIN_PA2
-    #define SID6581_PIN_D6  PIN_PA1
-    #define SID6581_PIN_D7  PIN_PA0
-
-    // use sort of PORTD and one pin of PORTC for address bus
-    // skip PD4 + PD5 so that they can be use as oscillator pinouts
-    #define SID6581_PIN_A0  PIN_PD2
-    #define SID6581_PIN_A1  PIN_PD3
-    #define SID6581_PIN_A2  PIN_PD6
-    #define SID6581_PIN_A3  PIN_PD7
-    #define SID6581_PIN_A4  PIN_PC7
-
-    // indicator LED
-    #define PIN_LED     PIN_PC4
-
-    // control pins
-    #define SID6581_PIN_RESET   PIN_PB3
-    #define SID6581_PIN_RW      PIN_PB0
-    #define SID6581_PIN_SEL     PIN_PB1
-
-    #define SID6581_PIN_CLOCK   PIN_PD5
-
-
-    void setup() {
-        pinMode( SID6581_PIN_D0, OUTPUT );
-        pinMode( SID6581_PIN_D1, OUTPUT );
-        pinMode( SID6581_PIN_D2, OUTPUT );
-        pinMode( SID6581_PIN_D3, OUTPUT );
-        pinMode( SID6581_PIN_D4, OUTPUT );
-        pinMode( SID6581_PIN_D5, OUTPUT );
-        pinMode( SID6581_PIN_D6, OUTPUT );
-        pinMode( SID6581_PIN_D7, OUTPUT );
-        
-        pinMode( SID6581_PIN_A0, OUTPUT );
-        pinMode( SID6581_PIN_A1, OUTPUT );
-        pinMode( SID6581_PIN_A2, OUTPUT );
-        pinMode( SID6581_PIN_A3, OUTPUT );
-        pinMode( SID6581_PIN_A4, OUTPUT );
-        
-        pinMode( SID6581_PIN_RESET, OUTPUT );
-        pinMode( SID6581_PIN_RW, OUTPUT );
-        pinMode( SID6581_PIN_SEL, OUTPUT );
-
-        pinMode( SID6581_PIN_CLOCK, OUTPUT );
-
-        setupClock();
-
-        resetChip();
-    }
-
-    void setupClock() {
-        pinMode( SID6581_PIN_CLOCK, OUTPUT );
-        TCCR1A = 0;
-        TCCR1B = 0;
-        TCNT1 = 0;
-        OCR1A = 7;   // toggle after counting to 8
-        TCCR1A |= (1 << COM1A0);   // Toggle OC1A on Compare Match.
-        TCCR1B |= (1 << WGM12);    // CTC mode
-        TCCR1B |= (1 << CS10);     // clock on, no pre-scaler
-
-        delayMicroseconds(1);
-    }
-
-
-    void waitCycle(void) {
-        /*uint8_t foo = digitalRead( SID6581_PIN_TIMER );
-
-        while( foo != HIGH ) {
-            Serial.println("Delay1");
-            foo = digitalRead( SID6581_PIN_TIMER );
-        }
-        
-        foo = digitalRead( SID6581_PIN_TIMER );
-        while( foo == HIGH ) {
-            Serial.println("Delay2");    
-            foo = digitalRead( SID6581_PIN_TIMER );
-        }*/
-        delayMicroseconds(2);
-    }
-
-    void setAddress(byte what) {
-        digitalWrite( SID6581_PIN_A0, CHECK_BIT(what,1)?HIGH:LOW );
-        digitalWrite( SID6581_PIN_A1, CHECK_BIT(what,2)?HIGH:LOW );
-        digitalWrite( SID6581_PIN_A2, CHECK_BIT(what,4)?HIGH:LOW );
-        digitalWrite( SID6581_PIN_A3, CHECK_BIT(what,8)?HIGH:LOW );
-        digitalWrite( SID6581_PIN_A4, CHECK_BIT(what,16)?HIGH:LOW );
-    }
-
-    void setData(byte what) {
-        digitalWrite( SID6581_PIN_D0, CHECK_BIT(what,1)?HIGH:LOW );
-        digitalWrite( SID6581_PIN_D1, CHECK_BIT(what,2)?HIGH:LOW );
-        digitalWrite( SID6581_PIN_D2, CHECK_BIT(what,4)?HIGH:LOW );
-        digitalWrite( SID6581_PIN_D3, CHECK_BIT(what,8)?HIGH:LOW );
-        digitalWrite( SID6581_PIN_D4, CHECK_BIT(what,16)?HIGH:LOW );
-        digitalWrite( SID6581_PIN_D5, CHECK_BIT(what,32)?HIGH:LOW );
-        digitalWrite( SID6581_PIN_D6, CHECK_BIT(what,64)?HIGH:LOW );
-        digitalWrite( SID6581_PIN_D7, CHECK_BIT(what,128)?HIGH:LOW );
-    }
-
-#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
-#define BYTE_TO_BINARY(byte)  \
-  (byte & 0x80 ? '1' : '0'), \
-  (byte & 0x40 ? '1' : '0'), \
-  (byte & 0x20 ? '1' : '0'), \
-  (byte & 0x10 ? '1' : '0'), \
-  (byte & 0x08 ? '1' : '0'), \
-  (byte & 0x04 ? '1' : '0'), \
-  (byte & 0x02 ? '1' : '0'), \
-  (byte & 0x01 ? '1' : '0') 
-
-    void write(byte addr, byte data) {
-        if (debug) Serial.printf("Writing to %i: "BYTE_TO_BINARY_PATTERN"\n", addr, BYTE_TO_BINARY(data));
-        setAddress(addr);
-        setData(data);
-        send();
-        //delayMicroseconds(2);
-    }
-
-    private:
-
-        void send() {
-            waitCycle();
-            
-            // Ensure chip is in WRITE mode
-            digitalWrite( SID6581_PIN_RW, LOW );
-            
-            // Select chip
-            digitalWrite( SID6581_PIN_SEL, LOW );
-            
-            // Wait for a high to come and go
-            waitCycle();
-            
-            // Ensure chip is in READ mode to avoid accidental writes ? // doctea
-            digitalWrite( SID6581_PIN_RW, HIGH );
-            
-            // Deselect chip
-            digitalWrite( SID6581_PIN_SEL, HIGH );
-        }
-
-    void resetChip(void) {
-        int x = 10;
-        
-        // Bring reset high
-        digitalWrite( SID6581_PIN_RESET, HIGH );
-        
-        // HIGH for 2 cycles
-        x = 2;
-        while( x > 0 ) {
-            waitCycle();
-            x--;
-        }
-        
-        digitalWrite( SID6581_PIN_RESET, LOW );
-        
-        // Bring reset LOW for 10 clock cycles
-        x = 10;
-        while( x > 0 ) {
-            waitCycle();
-            x--;
-        }
-        
-        digitalWrite( SID6581_PIN_RESET, HIGH );
-    }
-
-};
-
-struct voicemap {
-    byte FREQLO;
-    byte FREQHI;
-    byte PWLO;
-    byte PWHI;
-    byte CR;
-    byte AD;
-    byte SR;
-};
-
-struct sidmap {
-    voicemap voice0;
-    voicemap voice1;
-    voicemap voice2;
-    byte FCLO;
-    byte FCHI;
-    byte RESFILT;
-    byte MODEVOL;
-    byte POTX;
-    byte POTY;
-    byte OSC3;
-    byte ENV3;
-};
-
-// thanks http://www.sidmusic.org/sid/sidtech2.html
-// per-voice envelope + oscillator options
-enum ENVOSC {
-    gateMask = 0b00000001,  // When this bit is set to one, the envelope generator is gated (triggered) and the ATTACK/DECAY/SUSTAIN cycle is initiated.
-    syncMask = 0b00000010,  // synchronizes the fundamental frequency of oscillator 1 with the fundamental frequency of oscillator 3, producing "Hard Sync" effects
-    ringMask = 0b00000100,  // replaces the triangle waveform of output of oscillator 1 with a "Ring Modulated" combination of oscillators 1 and 3
-    testMask = 0b00001000,  // resets and locks oscillator 1 at zero until the TEST bit is cleared.
-    triMask  = 0b00010000,  // The triangle waveform is low in harmonics and has a mellow, flute-like quality.
-    sawMask  = 0b00100000,  // The sawtooth waveform is rich in even and odd harmonics and has a bright, brassy quality.
-    pulseMask= 0b01000000,  // Pulse waveform, affected by pulse width registers
-    noiseMask= 0b10000000,  // This output is a random signal which changes at the frequency of oscillator
-};
-
-//Bits 4-7 of this register (RES0-RES3) control the resonance of the filter. There are 16 resonance settings ranging linearly from no resonance (0) to maximum resonance (15 or $F).
-//Bits 0-3 determine which signals will be routed through the Filter:
-enum RESFILT {
-    filt1   =   0b00000001, // set to filter voice 1 
-    filt2   =   0b00000010, // set to filter voice 2
-    filt3   =   0b00000100, // set to filter voice 3
-    filtex  =   0b00001000, // set to filter external input
-};
-
-// per-chip filter options
-// bits 0-3 select volume (0-15)
-// Bits 4-7 of this register select various filter mode and output options:
-enum MODEVOL {
-    lowpass =   0b00010000,  // the low-pass output of the filter is selected and sent to the audio output 
-    bandpass =  0b00100000,  // the band-pass output of the filter is selected and sent to the audio output
-    highpass =  0b01000000,  // the high-pass output of the filter is selected and sent to the audio output
-    off3 =      0b10000000,  // voice 3 is disconnected from direct audio path, Setting voice 3 to bypass the filter (FILT 3 = 0) and setting 3 OFF to a one prevents voice 3 from reaching the audio output. allowing to use voice 3 for modulation purposes (eg with ringmask)
-};
+#include "sidspec.h"
 
 // get current voice register offset
 #define VREG(X)     (get_base_register_address() + offsetof(voicemap,X))
@@ -302,8 +15,9 @@ enum MODEVOL {
 // get chip register offset
 #define CREG(X)     (get_base_register_address() + offsetof(sidmap,X))
 
+bool debug = false;
+
 class Voice {
-    bool debug = false;
 
     Socket *hw;
     byte voice_number = 0;
@@ -324,14 +38,31 @@ class Voice {
         //this->offset = sizeof(voicemap) * voice_number;
     }
 
+    void printStatus() {
+        Serial.printf("Voice %i :: ", voice_number);
+        Serial.printf("Att=%2i,Dec=%2i,Sus=%2i,Rel=%2i :: ", attack, decay, sustain, release);
+        Serial.printf("PW=%2X :: ", pulseWidth);
+        Serial.printf("Freq=%5u :: ", curFrequency);
+        Serial.printf("Control=["BYTE_TO_BINARY_PATTERN"]", BYTE_TO_BINARY(control));
+        Serial.println();
+    }
+
     byte get_base_register_address() {
         return sizeof(voicemap) * this->voice_number;
+    }
+
+    void updateAll() {
+        updateAttackDecay();
+        updateSustainRelease();
+        updatePulseWidth();
+        updateVoiceFrequency();
+        updateControl();
     }
 
     // playing notes / frequency
     void playNote(byte note) {
         double freq = getFrequencyForNote(note);
-        Serial.printf("note %i: changing freq to %i (gap of %i)\n", note, freq, freq-lastFrequency);
+        Serial.printf("voice %i :: note %i: changing freq to %i (gap of %i)\n", voice_number, note, (uint16_t) freq, (uint16_t) freq-lastFrequency);
         lastFrequency = freq;
         curNote = note;
         setFrequency(freq, true);
@@ -407,11 +138,19 @@ class Voice {
         control &= ~ENVOSC::noiseMask;
         if (immediate) updateControl();
     }
+    void setOscMask(byte mask, bool immediate = true) {
+        control |= mask;
+        if (immediate) updateControl();
+    }
+    void unsetOscMask(byte mask, bool immediate = true) {
+        control &= ~mask;
+        if (immediate) updateControl();
+    }
 
     void updateControl() {
         // Set control register & data
-        if (debug) Serial.printf("Updating control at %i with %02X\n", VREG(CR), control);
-        hw->write(VREG(CR), control);
+        if (debug) Serial.printf("Updating control at %i with 0x%02X\n", VREG(CR), control);
+        hw->write(VREG(CR), control, "CR");
     }
 
     void setPulseWidth(uint16_t pw, bool immediate = true) {
@@ -419,21 +158,21 @@ class Voice {
         if (immediate) updatePulseWidth(); 
     }
     void updatePulseWidth() {
-        hw->write(VREG(PWLO), (uint8_t) (pulseWidth & 0b0000000011111111));
-        hw->write(VREG(PWHI), (uint8_t) (pulseWidth >> 8));
+        hw->write(VREG(PWLO), (uint8_t) (pulseWidth & 0b0000000011111111), "PWLO");
+        hw->write(VREG(PWHI), (uint8_t) (pulseWidth >> 8), "PWHI");
     }
 
     void updateVoiceFrequency() {
         uint16_t sid_frequency = getSIDFrequencyForFrequency(curFrequency);
-        hw->write(VREG(FREQLO), (uint8_t) (0b0000000011111111 & sid_frequency));
-        hw->write(VREG(FREQHI), (uint8_t) (0b0000000011111111 & (sid_frequency >> 8)));
+        hw->write(VREG(FREQLO), (uint8_t) (0b0000000011111111 & sid_frequency), "FREQLO");
+        hw->write(VREG(FREQHI), (uint8_t) (0b0000000011111111 & (sid_frequency >> 8)), "FREQHI");
     }
     
     // frequency calculation, either directly from passed-in double (eg from CV) or from a MIDI note
     double get_frequency_for_pitch(byte pitch) {
         return sidinote[pitch+1];   // hmmm needs to be +1, why?
     }
-    uint16_t getFrequencyForNote(byte note) {
+    double getFrequencyForNote(byte note) {
         return get_frequency_for_pitch(note);
     }
     uint16_t getSIDFrequencyForFrequency(double frequency) {
@@ -466,7 +205,7 @@ class Voice {
         if (immediate) updateAttackDecay();
     }
     void updateAttackDecay() {
-        hw->write(VREG(AD), this->attack << 4 | this->decay);
+        hw->write(VREG(AD), attack << 4 | decay, "AD");
     }
     
     // sustain and release are packed into same byte
@@ -479,17 +218,19 @@ class Voice {
         if (immediate) updateSustainRelease();
     }
     void updateSustainRelease() {
-        hw->write(VREG(SR), sustain << 4 | release);
+        hw->write(VREG(SR), sustain << 4 | release, "SR");
     }
 
     // helper function to set all ADSR params
-    void setADSR(byte attack, byte decay, byte sustain, byte release) {
+    void setADSR(byte attack, byte decay, byte sustain, byte release, bool immediate = true) {
         setAttack(attack,false);
         setDecay(decay,false);
         setSustain(sustain,false);
         setRelease(release,false);
-        updateAttackDecay();
-        updateSustainRelease();
+        if (immediate) {
+            updateAttackDecay();
+            updateSustainRelease();
+        }
     }
 
 
@@ -526,6 +267,23 @@ class SID6581 {
         Voice(&hw,2)
     };
 
+    void printStatus() {
+        Serial.println("-----status");
+        Serial.printf("Vol=%2i :: ", volume);
+        Serial.printf("Cutoff=%4i :: ", cutoff);
+        Serial.printf("Res=%2i :: ", resonance);
+        Serial.printf("filter_type=["BYTE_TO_BINARY_PATTERN"] :: ", BYTE_TO_BINARY(filter_type_mask));
+        Serial.printf("filter_voices=["BYTE_TO_BINARY_PATTERN"] :: ", BYTE_TO_BINARY(filter_voices));
+        if (filter_lowpass  & filter_type_mask) Serial.print("LP ");
+        if (filter_bandpass & filter_type_mask) Serial.print("BP ");
+        if (filter_highpass & filter_type_mask) Serial.print("HP ");
+        Serial.println();
+        for (int i = 0; i < 3 ; i++) {
+            voice[i].printStatus();
+        }
+        Serial.println("-status-----");
+    }
+
     SID6581() {};
 
     byte get_base_register_address() {
@@ -549,6 +307,7 @@ class SID6581 {
     }
 
     void resetChip(void) {
+        Serial.println("------resetChip------");
         int x = 10;
         
         // Bring reset high
@@ -571,9 +330,99 @@ class SID6581 {
         }
         
         digitalWrite( SID6581_PIN_RESET, HIGH );
+
+        setVolume(15,false);
+        unsetFilterVoice(0,false);
+        unsetFilterVoice(1,false);
+        unsetFilterVoice(2,false);
+        unsetFilterVoice(3);
+
+        updateAll();
+        Serial.println("------end resetChip------");
+    }
+
+    byte resonance = MAX_RESONANCE / 2;
+    byte filter_voices;
+
+    // update RESONANCE and filter voice ON/OFF
+    void setResonance(byte value, bool immediate = true) {
+        resonance = 0b00001111 & value;
+        if (immediate) updateFilterVoice();
+    }
+    void setFilterVoice(byte number, bool immediate = true) {
+        filter_voices |= 1 << number;
+        Serial.printf("setFilterVoice(%i)\n", number);
+        if (immediate) updateFilterVoice();
+    }
+    void unsetFilterVoice(byte number, bool immediate = true) {
+        filter_voices &= ~(1 << number);
+        Serial.printf("unsetFilterVoice(%i)\n", number);
+        if (immediate) updateFilterVoice();
+    }
+    void updateFilterVoice() {
+        hw.write(CREG(RESFILT), ((resonance<<4) | filter_voices), "RESFILT");
+    }
+
+    // update filter TYPE mask and VOLUME
+    byte filter_type_mask;
+    byte volume = MAX_VOLUME;
+    void setFilterType(byte mask, bool immediate = true) {
+        filter_type_mask |= mask;
+        if (immediate) updateFilterType();
+    }
+    void unsetFilterType(byte mask, bool immediate = true) {
+        filter_type_mask &= ~mask;
+        if (immediate) updateFilterType();
+    }
+    void setVolume(byte volume, bool immediate = true) {
+        Serial.printf("setVolume(%i) called\n", volume);
+        this->volume = 0b00001111 & volume;
+        if (immediate) updateFilterType();
+    }
+    void updateFilterType() {
+        Serial.printf("updateFilterVoice with filter_type_mask [%02x] and volume [%02x]\n", filter_type_mask, volume);
+        hw.write(CREG(MODEVOL), filter_type_mask | volume, "MODEVOL");
+    }
+
+    uint16_t cutoff = MAX_CUTOFF/2;
+    void setCutoff(uint16_t cutoff, bool immediate = true) {
+        //Serial.printf("Setting cutoff to %i", (cutoff));
+        this->cutoff = cutoff & 0b0000111111111111;
+        if (immediate) updateCutoff();
+    }
+    uint16_t getCutoff() {
+        return this->cutoff & 0b0000111111111111;
+    }
+    void updateCutoff() {
+        uint16_t co = getCutoff();
+        hw.write(CREG(FCHI), co >> 8, "FCHI");
+        hw.write(CREG(FCLO), 0b0000000000001111 & co, "FCLO");
+    }
+
+    void updateAll() {
+        updateFilterVoice();
+        updateFilterType();
+        updateCutoff();
+        voice[0].updateAll();
+        voice[1].updateAll();
+        voice[2].updateAll();
+    }
+
+    void setAllFrequency(double frequency) {
+        for (int i = 0 ; i < 3 ; i++) 
+            voice[i].setFrequency(frequency);
+    }
+    void allGateOn() {
+        for (int i = 0 ; i < 3 ; i++) 
+            voice[i].gateOn();
+    }
+    void allGateOff() {
+        for (int i = 0 ; i < 3 ; i++) 
+            voice[i].gateOff();
     }
 
     void setup() {
+        Serial.println("\n=================sid setup=================");
         hw.setup();
 
         resetChip();
@@ -590,30 +439,59 @@ class SID6581 {
         voice[2].setSustain(15);
         voice[2].setRelease(15, true);*/
 
-        hw.write(23,0xF7); //1ch filter
-        hw.write(24,0x0F); //volume
+        //hw.write(23,0xF7); //1ch filter
+        //hw.write(24,0x0F); //volume
+        //hw.write(CREG)
 
-        hw.write(CREG(RESFILT),0xF0);
-        hw.write(CREG(MODEVOL),0x0F);
+        //hw.write(CREG(RESFILT),0xF7, "SETUP RESFILT");
+        setVolume(MAX_VOLUME,false);
+        //setResonance(MAX_RESONANCE,false);
+        unsetFilterVoice(0,false);
+        unsetFilterVoice(1,false);
+        unsetFilterVoice(2,false);
+        unsetFilterVoice(3,false);
+        setVolume(MAX_VOLUME);
+        //hw.write(CREG(MODEVOL),0x0F, "SETUP MODEVOL");
+        voice[0].setADSR(1,8,15,10,false);
+        voice[1].setADSR(1,8,15,10,false);
+        voice[2].setADSR(1,8,15,10,false);
+        //voice[0].setFrequency(MAX_FREQ/2,false);
+        //voice[1].setFrequency(MAX_FREQ/3,false);
+        //voice[2].setFrequency(MAX_FREQ/4,false);
+        setAllFrequency(880);
+        voice[0].triOn(false);
+        voice[1].sawOn(false);
+        voice[2].sawOn(false);
+        updateAll();
 
-        voice[0].triOn(true);
-        voice[1].sawOn(true);
-        voice[1].sawOn(true);
-        voice[2].sawOn(true);
+        allGateOn();
+/*
+        setFilterType(filter_lowpass,false);
+        unsetFilterVoice(0,false);
+        unsetFilterVoice(1,false);
+        unsetFilterVoice(2,false);
+        setResonance(MAX_RESONANCE/2,false);
+        setCutoff(MAX_CUTOFF/2,false);
+
+        voice[0].triOn(false);
+        voice[1].sawOn(false);
+        voice[1].sawOn(false);
+        voice[2].sawOn(false);
         //voice[2].pulseOn(true);
+        
+        voice[0].setADSR(1,8,15,10,false);
+        voice[1].setADSR(1,8,15,10,false);
+        voice[2].setADSR(1,8,15,10,false);
 
-        voice[0].setADSR(1,8,15,10);
-        voice[1].setADSR(1,8,15,10);
-        voice[2].setADSR(1,8,15,10);
+        voice[0].setFrequency(MAX_FREQ/2);
+        voice[1].setFrequency(MAX_FREQ/3);
+        voice[2].setFrequency(MAX_FREQ/4);
 
-        /*voice[0].setADSR(1,1,15,2);
-        voice[1].setADSR(4,4,8,2);
-        voice[2].setADSR(8,8,4,2);*/
+        updateAll();
+*/
 
         voice[0].gateOn(true);
-        delay(1000);
         voice[1].gateOn(true);
-        delay(1000);
         voice[2].gateOn(true);
 
         delay(1000);
@@ -625,6 +503,8 @@ class SID6581 {
         delay(1000);
 
         //test_tones();            
+
+        Serial.println("=================end sid setup=================");
     }
 
     void tone(unsigned short i) {
@@ -637,12 +517,24 @@ class SID6581 {
         hw.write(CR+voice3_base,17);
         delay(200);
         hw.write(CR+voice3_base,16);
+
+        /*voice[3].setFrequency(i);
+        voice[3].triOn();
+
+        voice[3].gateOn();
+        delay(200);
+        voice[3].gateOff();*/
+
         delay(300);
     }
 
     void test_tones() {
-        hw.write(23,0xF1); //1ch filter
-        hw.write(24,0x0F); //volume
+        //hw.write(23,0xF1); //1ch filter
+        //hw.write(24,0x0F); //volume
+        /*setFilterVoice(0);
+        unsetFilterVoice(1);
+        unsetFilterVoice(2);
+        setVolume(MAX_VOLUME);*/
     
         #define T1khz  16777U
         #define T2khz (16777U*2U)
@@ -661,3 +553,7 @@ class SID6581 {
     }
 
 };
+
+extern SID6581 sid;
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef SIDINOTES__INCLUDED
+#define SIDINOTES__INCLUDED
+
 // MIDI_BASE_NOTE of 57
 // BASEFREQ of 440
 // using PAL_PHI of 985248
@@ -131,3 +134,6 @@ double sidinote[] = {
 	22350.606811712252, // note 125 freq 22350.606811712252
 	23679.6430535446, // note 126 freq 23679.6430535446
 };
+
+
+#endif
