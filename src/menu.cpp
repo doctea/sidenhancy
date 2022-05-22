@@ -10,8 +10,8 @@
 #include "menu.h"
 #include "menuitems.h"
 
-DisplayTranslator tft = DisplayTranslator_SS_OLED();
-Menu menu = Menu(&tft);
+DisplayTranslator *tft;// = DisplayTranslator_SS_OLED();
+Menu &menu;// = Menu(&tft);
 
 /*PositionIndicator posbar = PositionIndicator();
 //LooperStatus mpk49_looper = LooperStatus();
@@ -60,6 +60,9 @@ void setup_menu() {
     #endif
 
     //menu = Menu(tft);        
+
+    tft = new DisplayTranslator_SS_OLED();
+    menu = Menu(tft);
 
     menu.add(&test_item_1);
     menu.add(&test_item_2);
