@@ -9,11 +9,12 @@ ADS1115 ADS(0x48);
 float scaler = 0.97;
 
 void setup_ads() {
-  Serial.println("initiating ADS");
+  Serial.println("initiating ADS..");
   ADS.begin();
   ADS.setGain(0);
 
   ADS.requestADC(0);    // start continuous reads ?
+  Serial.println("Finished initialising ADS!");
 }
 
 int read_value(int channel = 0) {

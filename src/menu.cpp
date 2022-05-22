@@ -11,7 +11,7 @@
 #include "menuitems.h"
 
 DisplayTranslator *tft;// = DisplayTranslator_SS_OLED();
-Menu &menu;// = Menu(&tft);
+Menu *menu;// = Menu(&tft);
 
 /*PositionIndicator posbar = PositionIndicator();
 //LooperStatus mpk49_looper = LooperStatus();
@@ -61,12 +61,22 @@ void setup_menu() {
 
     //menu = Menu(tft);        
 
+    Serial.println("Instantiating DisplayTranslator_SS_OLED..");
     tft = new DisplayTranslator_SS_OLED();
-    menu = Menu(tft);
+    delay(50);
+    Serial.println("Finished DisplayTranslator_SS_OLED constructor");
+    Serial.flush();
+    Serial.println("Creating Menu object..");
+    Serial.flush();
+    menu = new Menu(tft);
+    Serial.println("Created Menu object..");
+    Serial.flush();
 
-    menu.add(&test_item_1);
-    menu.add(&test_item_2);
-    menu.add(&test_item_3);
+    Serial.println("Adding test menu items..");
+    menu->add(&test_item_1);
+    menu->add(&test_item_2);
+    menu->add(&test_item_3);
+    Serial.println("Added test menu items!");
 
 }
 

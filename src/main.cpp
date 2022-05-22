@@ -34,10 +34,10 @@ void setup() {
     setup_ads();
 
     #ifdef ENABLE_SCREEN
-      setup_menu();
       Serial.println("Setting up display..");
+      setup_menu();
       //setup_display();
-      Serial.println("Display initialised!");
+      Serial.println("Finished initialising display!");
       //tft_print("hello", 0, 0);
     #endif
     
