@@ -50,10 +50,7 @@ class Socket {
     #define SID6581_PIN_A3  PIN_PD7
     #define SID6581_PIN_A4  PIN_PC2
 
-    // indicator LED
-    #define PIN_LED     PIN_PC4
-
-    // control pins
+    // SID control pins
     #define SID6581_PIN_RESET   PIN_PB3
     #define SID6581_PIN_RW      PIN_PB0
     #define SID6581_PIN_SEL     PIN_PB1

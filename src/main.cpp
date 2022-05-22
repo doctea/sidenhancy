@@ -1,12 +1,16 @@
 #include "Arduino.h"
 
-#define ENABLE_SCREEN
-
-#include "display_ss.h"
+#include "Config.h"
 
 #include "sid6581.h"
 #include "ads.h"
 
+//#include "display_ss.h"
+#ifdef ENABLE_SCREEN
+  #include "io.h"
+  #include "mymenu.h"
+  void setup_menu();
+#endif
 
 //#include "mtof.h"
 
@@ -30,10 +34,11 @@ void setup() {
     setup_ads();
 
     #ifdef ENABLE_SCREEN
+      setup_menu();
       Serial.println("Setting up display..");
-      setup_display();
+      //setup_display();
       Serial.println("Display initialised!");
-      tft_print("hello", 0, 0);
+      //tft_print("hello", 0, 0);
     #endif
     
     Serial.println("exiting setup()");
@@ -177,9 +182,9 @@ void loop() {
   while(Serial.available()) {
     char i = Serial.read();
     Serial.println(i);
-    if (i=='d') {
+    /*if (i=='d') {
       tft_print("test?", random(40), random(10));
-    }
+    }*/
     if (i=='#') {
       sid.printStatus();
       return;
