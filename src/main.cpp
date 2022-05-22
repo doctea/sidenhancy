@@ -264,16 +264,16 @@ void loop() {
       return;
     }
     if (i=='U') {
-      bool orig_debug = debug;
+      bool orig_debug = debug_sid;
       Serial.println("calling sid->updateAll()");
-      debug = true;
+      debug_sid = true;
       sid.updateAll();
-      debug = orig_debug;
+      debug_sid = orig_debug;
       Serial.println("---");
     }
     if (i=='_') {
-      debug = !debug;
-      Serial.printf("debug set to %i\n------\n", debug);
+      debug_sid = !debug_sid;
+      Serial.printf("debug set to %i\n------\n", debug_sid);
       return;
     }
     if (i=='E') {

@@ -51,9 +51,20 @@ Menu *menu;// = Menu(&tft);
     USBDevicesPanel usbdevices_panel = USBDevicesPanel();
 #endif*/
 
+#include "sid6581.h"
+
 MenuItem test_item_1 = MenuItem("test 1");
 MenuItem test_item_2 = MenuItem("test 2");
 MenuItem test_item_3 = MenuItem("test 3");
+
+void change_filter_cutoff(int last_value, int new_value) {
+    Serial.printf("change_filter_cutoff from %i to %i\n", last_value, new_value);
+    sid.setCutoff(new_value);
+}
+
+DirectNumberControl filter_cutoff_control("Filter cutoff", &sid.cutoff, sid.cutoff, 0, MAX_CUTOFF, change_filter_cutoff); //void (*on_change_handler)(int last_value, int new_value)) 
+//NumberControl(const char* label, int *in_target_variable, int start_value, int min_value, int max_value, void (*on_change_handler)(int last_value, int new_value)) 
+
 
 void setup_menu() {
     /*menu.add(&posbar);
@@ -90,10 +101,13 @@ void setup_menu() {
     Serial.println("Created Menu object..");
     Serial.flush();
 
+    filter_cutoff_control.setStep(32);
+
     Serial.println("Adding test menu items..");
     menu->add(&test_item_1);
     menu->add(&test_item_2);
     menu->add(&test_item_3);
+    menu->add(&filter_cutoff_control);
     Serial.println("Added test menu items!");
 
 }

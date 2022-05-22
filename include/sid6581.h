@@ -15,7 +15,7 @@
 // get chip register offset
 #define CREG(X)     (get_base_register_address() + offsetof(sidmap,X))
 
-bool debug = false;
+extern bool debug_sid;
 
 class Voice {
 
@@ -149,7 +149,7 @@ class Voice {
 
     void updateControl() {
         // Set control register & data
-        if (debug) Serial.printf("Updating control at %i with 0x%02X\n", VREG(CR), control);
+        if (debug_sid) Serial.printf("Updating control at %i with 0x%02X\n", VREG(CR), control);
         hw->write(VREG(CR), control, (char*)"CR");
     }
 
@@ -185,9 +185,9 @@ class Voice {
 
     // envelopes
     void gateOn(bool immediate = true) {
-        if (debug) Serial.printf("voice %i: gateOn starting with "BYTE_TO_BINARY_PATTERN, voice_number, BYTE_TO_BINARY(control));
+        if (debug_sid) Serial.printf("voice %i: gateOn starting with "BYTE_TO_BINARY_PATTERN, voice_number, BYTE_TO_BINARY(control));
         control |= gateMask;
-        if (debug) Serial.printf(" and changed to "BYTE_TO_BINARY_PATTERN"\n", BYTE_TO_BINARY(control));
+        if (debug_sid) Serial.printf(" and changed to "BYTE_TO_BINARY_PATTERN"\n", BYTE_TO_BINARY(control));
         if (immediate) updateControl();
     }
     void gateOff(bool immediate = true) {
@@ -384,7 +384,7 @@ class SID6581 {
         hw.write(CREG(MODEVOL), filter_type_mask | volume, "MODEVOL");
     }
 
-    uint16_t cutoff = MAX_CUTOFF/2;
+    int cutoff = MAX_CUTOFF/2;
     void setCutoff(uint16_t cutoff, bool immediate = true) {
         //Serial.printf("Setting cutoff to %i", (cutoff));
         this->cutoff = cutoff & 0b0000111111111111;

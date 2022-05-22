@@ -21,7 +21,7 @@
   (byte & 0x02 ? '1' : '0'), \
   (byte & 0x01 ? '1' : '0') 
 
-extern bool debug;
+extern bool debug_sid;
 
 // implement stuff for actually reading/writing to the chip - so can "easily" rewire it
 class Socket {

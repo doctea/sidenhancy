@@ -1,11 +1,10 @@
-#ifndef SIDINOTES__INCLUDED
-#define SIDINOTES__INCLUDED
+#include "myfreqs.h"
 
 // MIDI_BASE_NOTE of 57
 // BASEFREQ of 440
 // using PAL_PHI of 985248
 // constant is 17.02841924063789
-extern double sidinote[127];/* = {
+double sidinote[] = {
 	16.351597831287414, // note 0 freq 16.351597831287414
 	17.323914436054505, // note 1 freq 17.323914436054505
 	18.354047994837977, // note 2 freq 18.354047994837977
@@ -24,7 +23,7 @@ extern double sidinote[127];/* = {
 	38.890872965260115, // note 15 freq 38.890872965260115
 	41.20344461410875, // note 16 freq 41.20344461410875
 	43.653528929125486, // note 17 freq 43.653528929125486
-	46.2493028389543, // note 18 freq 46.2493028389543`
+	46.2493028389543, // note 18 freq 46.2493028389543
 	48.999429497718666, // note 19 freq 48.999429497718666
 	51.91308719749314, // note 20 freq 51.91308719749314
 	55.0, // note 21 freq 55.0
@@ -134,6 +133,5 @@ extern double sidinote[127];/* = {
 	22350.606811712252, // note 125 freq 22350.606811712252
 	23679.6430535446, // note 126 freq 23679.6430535446
 };
-*/
 
-#endif
+
