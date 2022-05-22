@@ -2,8 +2,6 @@
 //#include "storage.h"
 #ifdef ENABLE_SCREEN
 
-#define TFT_SSOLED
-
 //#include "tft.h"
 #include "io.h"
 #include "mymenu.h"
@@ -12,6 +10,24 @@
 
 DisplayTranslator *tft;// = DisplayTranslator_SS_OLED();
 Menu *menu;// = Menu(&tft);
+
+
+#ifdef ENCODER_KNOB_L
+    Encoder knob(ENCODER_KNOB_L, ENCODER_KNOB_R);
+    //extern Encoder knob;
+#endif
+#ifdef PIN_BUTTON_A
+    Bounce pushButtonA = Bounce(PIN_BUTTON_A, 10); // 10ms debounce
+    //extern Bounce pushButtonA;
+#endif
+#ifdef PIN_BUTTON_B
+    Bounce pushButtonB = Bounce(PIN_BUTTON_B, 10); // 10ms debounce
+    //extern Bounce pushButtonB; 
+#endif
+#ifdef PIN_BUTTON_C
+    Bounce pushButtonC = Bounce(PIN_BUTTON_C, 10); // 10ms debounce
+    //extern Bounce pushButtonC;
+#endif
 
 /*PositionIndicator posbar = PositionIndicator();
 //LooperStatus mpk49_looper = LooperStatus();
@@ -51,7 +67,9 @@ void setup_menu() {
     menu.add(&transpose_control);
     menu.add(&usbdevices_panel);*/
 
+    #ifdef PIN_BUTTON_A
     pinMode(PIN_BUTTON_A, INPUT_PULLUP);
+    #endif
     #ifdef PIN_BUTTON_B
         pinMode(PIN_BUTTON_B, INPUT_PULLUP);
     #endif

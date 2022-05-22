@@ -7,8 +7,9 @@
 
 //#include "display_ss.h"
 #ifdef ENABLE_SCREEN
-  #include "io.h"
+  //#include "io.h"
   #include "mymenu.h"
+  //#include "menu_io.h"
   void setup_menu();
 #endif
 
@@ -178,6 +179,13 @@ void led_off() {
 void loop() {
   static int mode = 0;
   static bool paused = false;
+
+  menu->update_inputs();
+
+  static int last_updated_display;
+  if (millis()-50 > last_updated_display)
+    menu->display();
+  last_updated_display = millis();
 
   while(Serial.available()) {
     char i = Serial.read();
