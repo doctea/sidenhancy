@@ -180,12 +180,12 @@ void loop() {
   static int mode = 0;
   static bool paused = false;
 
-  menu->update_inputs();
-
-  static int last_updated_display;
-  if (millis()-50 > last_updated_display)
+  static unsigned long last_drawn;
+  if (millis() - last_drawn > 50) {
+    menu->update_inputs();
     menu->display();
-  last_updated_display = millis();
+    last_drawn = millis();
+  }
 
   while(Serial.available()) {
     char i = Serial.read();
