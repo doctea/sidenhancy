@@ -19,6 +19,7 @@ SID6581 sid = SID6581();
 
 void setup() {
     Serial.begin(115200);
+    Serial.println("\n\n\n======================= sidenhancy starting up! >>>>>>>>>>>>>>>>>>>>>\n");
     //while (!Serial);
     // todo: MIDI on Serial1
 
@@ -26,23 +27,26 @@ void setup() {
 
     digitalWrite(PIN_LED, HIGH);
 
-    Serial.println("eurosid starting up..");
-
-    Serial.println("Initialising sid..");
+    Serial.println("\tInitialising sid..");
     sid.setup();
-    Serial.println("sid initialised!");
+    /*sid.voice[0].pulseOn();
+    sid.voice[1].pulseOn();
+    sid.voice[2].pulseOn();
+    sid.voice[0].sawOn();
+    sid.voice[2].sawOn();*/
+    Serial.println("\tsid initialised!");
 
     setup_ads();
 
     #ifdef ENABLE_SCREEN
-      Serial.println("Setting up display..");
+      Serial.println("\tSetting up display..");
       setup_menu();
       //setup_display();
-      Serial.println("Finished initialising display!");
+      Serial.println("\tFinished initialising display!");
       //tft_print("hello", 0, 0);
     #endif
     
-    Serial.println("exiting setup()");
+    Serial.println("exiting setup()\n\n");
 }
 
 
@@ -109,7 +113,12 @@ void adc_loop() {
 
 void adc_direct_freq_loop() {
   static int last_freq;
+  //Serial.println("adc_direct_freq_loop().."); Serial.flush();
   int freq = get_frequency_for_voltage(read_voltage(0));
+  //Serial.printf("Read channel 0: %i\n", freq); Serial.flush();
+  //int pulseWidth = freq; // read_voltage(1);
+  //Serial.printf("Read channel 1: %i\n", pulseWidth); Serial.flush();
+
   if (freq!=last_freq) {
     //Serial.printf("got freq %i\n", freq);
     /*sid.playNote(0,pitch);
@@ -119,24 +128,28 @@ void adc_direct_freq_loop() {
     sid.voice[0].setADSR(1,1,15,1);
     sid.voice[0].gateOn(); 
     sid.voice[0].setFrequency(freq); 
+    //sid.voice[0].setPulseWidth(pulseWidth);
+    sid.voice[0].setPulseWidth(freq);
     sid.voice[1].setADSR(1,1,15,1);
     sid.voice[1].gateOn(); 
     sid.voice[1].setFrequency(freq); 
+    sid.voice[1].setPulseWidth(freq);
     sid.voice[2].setADSR(1,1,15,1);
     sid.voice[2].gateOn();
     sid.voice[2].setFrequency(freq);
+    sid.voice[2].setPulseWidth(freq);
   }
 }
 
 void note_loop() {
     //sid.test_tones();
-    Serial.println("Looped!");
+    Serial.println("Looped!"); Serial.flush();
     static int value = 33;
 
     if (value>=80)
       value = 33;
 
-    Serial.printf("Sounding chord %i...\n", value);
+    Serial.printf("Sounding chord %i...\n", value); Serial.flush();
 
     static int a,d,s,r;
 
@@ -177,13 +190,19 @@ void led_off() {
 }
 
 void loop() {
+  bool debug = false;
   static int mode = 0;
   static bool paused = false;
 
+  if (debug) {  Serial.println("Start loop()!"); Serial.flush(); }
+
   static unsigned long last_drawn;
   if (millis() - last_drawn > 50) {
+    if (debug) { Serial.println("updating inputs().."); Serial.flush(); }
     menu->update_inputs();
+    if (debug) { Serial.println("updating display()!"); Serial.flush(); }
     menu->display();
+    if (debug) { Serial.println("done display()!"); Serial.flush(); }
     last_drawn = millis();
   }
 
@@ -267,6 +286,7 @@ void loop() {
       bool orig_debug = debug_sid;
       Serial.println("calling sid->updateAll()");
       debug_sid = true;
+
       sid.updateAll();
       debug_sid = orig_debug;
       Serial.println("---");
@@ -274,6 +294,14 @@ void loop() {
     if (i=='_') {
       debug_sid = !debug_sid;
       Serial.printf("debug set to %i\n------\n", debug_sid);
+      return;
+    }
+    if (i=='M') {
+      static int oscMask = 1;
+      oscMask = oscMask << 1;
+      if (oscMask>15)
+        oscMask = 1;
+      sid.voice[0].setOscMask(oscMask<<4);
       return;
     }
     if (i=='E') {

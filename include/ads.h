@@ -1,6 +1,7 @@
 #include "ADS1X15.h"
 
 extern ADS1115 ADS;
+extern int ads_values[4];
 
 void setup_ads();
 

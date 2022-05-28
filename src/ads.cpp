@@ -8,20 +8,25 @@ ADS1115 ADS(0x48);
 
 float scaler = 0.97;
 
+int16_t ads_values[4] = { 0, 0, 0, 0 };
+
 void setup_ads() {
-  Serial.println("initiating ADS..");
+  Serial.println("initiating ADS.."); Serial.flush();
   ADS.begin();
   ADS.setGain(0);
 
   ADS.requestADC(0);    // start continuous reads ?
-  Serial.println("Finished initialising ADS!");
+  ADS.requestADC(1);    // start continuous reads ?
+  Serial.println("Finished initialising ADS!"); Serial.flush();
 }
 
 int read_value(int channel = 0) {
   static int value;
-  ADS.requestADC(channel);
+  //ADS.requestADC(channel);
   //if (ADS.isReady()) {
-    value = ADS.getValue();
+    //value = ADS.getValue();
+    value = ADS.readADC(channel);
+  //ads_values[channel] = value;
   //}
   return value;
   //return ADS.getLastValue();

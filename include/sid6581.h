@@ -459,9 +459,14 @@ class SID6581 {
         //voice[1].setFrequency(MAX_FREQ/3,false);
         //voice[2].setFrequency(MAX_FREQ/4,false);
         setAllFrequency(880);
-        voice[0].triOn(false);
-        voice[1].sawOn(false);
-        voice[2].sawOn(false);
+        //voice[0].sawOn(true);
+        //voice[0].triOn(true);
+        voice[0].pulseOn(true);
+        //voice[1].sawOn(true);
+        //voice[1].triOn(true);
+        voice[1].pulseOn(true);
+        //voice[2].sawOn(true);
+        voice[2].pulseOn(true);
         updateAll();
 
         allGateOn();
