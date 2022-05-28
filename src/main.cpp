@@ -19,7 +19,7 @@ SID6581 sid = SID6581();
 
 void setup() {
     Serial.begin(115200);
-    Serial.println("\n\n\n======================= sidenhancy starting up! >>>>>>>>>>>>>>>>>>>>>\n");
+    Serial.println(F("\n\n\n======================= sidenhancy starting up! >>>>>>>>>>>>>>>>>>>>>\n"));
     //while (!Serial);
     // todo: MIDI on Serial1
 
@@ -27,26 +27,26 @@ void setup() {
 
     digitalWrite(PIN_LED, HIGH);
 
-    Serial.println("\tInitialising sid..");
+    Serial.println(F("\tInitialising sid.."));
     sid.setup();
     /*sid.voice[0].pulseOn();
     sid.voice[1].pulseOn();
     sid.voice[2].pulseOn();
     sid.voice[0].sawOn();
     sid.voice[2].sawOn();*/
-    Serial.println("\tsid initialised!");
+    Serial.println(F("\tsid initialised!"));
 
     setup_ads();
 
     #ifdef ENABLE_SCREEN
-      Serial.println("\tSetting up display..");
+      Serial.println(F("\tSetting up display.."));
       setup_menu();
       //setup_display();
-      Serial.println("\tFinished initialising display!");
+      Serial.println(F("\tFinished initialising display!"));
       //tft_print("hello", 0, 0);
     #endif
     
-    Serial.println("exiting setup()\n\n");
+    Serial.println(F("exiting setup()\n\n"));
 }
 
 
@@ -103,7 +103,7 @@ void adc_loop() {
   static int last_pitch;
   int pitch = get_midi_pitch_for_voltage(read_voltage(0));
   if (pitch!=last_pitch) {
-    Serial.printf("got pitch %i\n", pitch);
+    Serial.printf(F("got pitch %i\n"), pitch);
     sid.playNote(0,pitch);
     sid.playNote(1,pitch);
     sid.playNote(2,pitch);
@@ -116,8 +116,13 @@ void adc_direct_freq_loop() {
   //Serial.println("adc_direct_freq_loop().."); Serial.flush();
   int freq = get_frequency_for_voltage(read_voltage(0));
   //Serial.printf("Read channel 0: %i\n", freq); Serial.flush();
-  //int pulseWidth = freq; // read_voltage(1);
+  float value2 = read_voltage(1);
+  static uint16_t last_pw;
+  uint16_t pulseWidth = 4095 * read_voltage(1);
+  Serial.printf("voltage: %i (%u)\n", (value2*100), pulseWidth);
   //Serial.printf("Read channel 1: %i\n", pulseWidth); Serial.flush();
+  //static int pulseWidth = 0;
+  //pulseWidth+=32;
 
   if (freq!=last_freq) {
     //Serial.printf("got freq %i\n", freq);
@@ -125,31 +130,42 @@ void adc_direct_freq_loop() {
     sid.playNote(1,pitch);
     sid.playNote(2,pitch);*/
     
-    sid.voice[0].setADSR(1,1,15,1);
-    sid.voice[0].gateOn(); 
-    sid.voice[0].setFrequency(freq); 
+    //sid.voice[0].setADSR(1,1,15,1);
+    //sid.voice[0].gateOn(); 
+    sid.allGateOn();
+    sid.setAllFrequency(freq);
+    //sid.voice[0].setFrequency(freq); 
     //sid.voice[0].setPulseWidth(pulseWidth);
-    sid.voice[0].setPulseWidth(freq);
-    sid.voice[1].setADSR(1,1,15,1);
-    sid.voice[1].gateOn(); 
-    sid.voice[1].setFrequency(freq); 
-    sid.voice[1].setPulseWidth(freq);
-    sid.voice[2].setADSR(1,1,15,1);
-    sid.voice[2].gateOn();
-    sid.voice[2].setFrequency(freq);
-    sid.voice[2].setPulseWidth(freq);
+    //sid.voice[0].setPulseWidth(pulseWidth);
+    //sid.voice[1].setADSR(1,1,15,1);
+    //sid.voice[1].gateOn(); 
+    //sid.voice[1].setFrequency(freq); 
+    //sid.voice[1].setPulseWidth(pulseWidth);
+    //sid.voice[2].setADSR(1,1,15,1);
+    //sid.voice[2].gateOn();
+    //sid.voice[2].setFrequency(freq);
+    //sid.voice[2].setPulseWidth(pulseWidth);
   }
+  if (pulseWidth!=last_pw) {
+    Serial.println(pulseWidth);
+    sid.voice[0].setPulseWidth(pulseWidth);
+    sid.voice[1].setPulseWidth(pulseWidth);
+    sid.voice[2].setPulseWidth(pulseWidth);
+  }
+  last_freq = freq;
+  last_pw = pulseWidth;
+
 }
 
 void note_loop() {
     //sid.test_tones();
-    Serial.println("Looped!"); Serial.flush();
+    Serial.println(F("Looped!")); Serial.flush();
     static int value = 33;
 
     if (value>=80)
       value = 33;
 
-    Serial.printf("Sounding chord %i...\n", value); Serial.flush();
+    Serial.printf(F("Sounding chord %i...\n"), value); Serial.flush();
 
     static int a,d,s,r;
 
@@ -172,7 +188,7 @@ void note_loop() {
     delay(1000);
 
     digitalWrite(PIN_LED, LOW);
-    Serial.printf("Stopping note %i.\n", value);
+    Serial.printf(F("Stopping note %i.\n"), value);
     sid.stopNote(0);
     sid.stopNote(1);
     sid.stopNote(2);
@@ -194,15 +210,15 @@ void loop() {
   static int mode = 0;
   static bool paused = false;
 
-  if (debug) {  Serial.println("Start loop()!"); Serial.flush(); }
+  if (debug) {  Serial.println(F("Start loop()!")); Serial.flush(); }
 
   static unsigned long last_drawn;
   if (millis() - last_drawn > 50) {
-    if (debug) { Serial.println("updating inputs().."); Serial.flush(); }
+    if (debug) { Serial.println(F("updating inputs()..")); Serial.flush(); }
     menu->update_inputs();
-    if (debug) { Serial.println("updating display()!"); Serial.flush(); }
+    if (debug) { Serial.println(F("updating display()!")); Serial.flush(); }
     menu->display();
-    if (debug) { Serial.println("done display()!"); Serial.flush(); }
+    if (debug) { Serial.println(F("done display()!")); Serial.flush(); }
     last_drawn = millis();
   }
 
@@ -218,7 +234,7 @@ void loop() {
     }
     if (i=='P') {
       paused = !paused;
-      if (paused) Serial.println("Paused");
+      if (paused) Serial.println(F("Paused"));
       return;
     }
     if (i=='S') {
@@ -229,7 +245,7 @@ void loop() {
       return;
     }
     if (i=='F') {
-      Serial.println("Setting filtervoices"); // and random oscmask");
+      Serial.println(F("Setting filtervoices")); // and random oscmask");
       for (int i = 0 ; i < 3 ; i++) {
         //sid.voice[i].setOscMask(random(15));
         sid.setFilterVoice(i,false);
@@ -238,7 +254,7 @@ void loop() {
       return;
     }
     if (i=='f') {
-      Serial.println("Unsetting filterVoice");
+      Serial.println(F("Unsetting filterVoice"));
       for (int i = 0 ; i < 3 ; i++) {
         sid.unsetFilterVoice(i,false);
       }
@@ -272,6 +288,18 @@ void loop() {
         //delay(1);
       }
     }
+    if (i=='M') {
+      static int oscMask = 1;
+      static int oscNum = 0;
+      sid.voice[oscNum].unsetOscMask(oscMask<<4);
+      oscMask = oscMask << 1;
+      if (oscMask>15)
+        oscMask = 1;
+      oscNum++; oscNum %= 3;
+      Serial.printf(F("setting osc %i to oscMask %i\n"), oscNum, oscMask);
+      sid.voice[oscNum].setOscMask(oscMask<<4);
+      return;
+    }
     if(i=='+') {
       if (sid.cutoff>=MAX_CUTOFF) sid.cutoff = MAX_CUTOFF/2;
       sid.setCutoff(sid.getCutoff()+1);
@@ -284,28 +312,20 @@ void loop() {
     }
     if (i=='U') {
       bool orig_debug = debug_sid;
-      Serial.println("calling sid->updateAll()");
+      Serial.println(F("calling sid->updateAll()"));
       debug_sid = true;
 
       sid.updateAll();
       debug_sid = orig_debug;
-      Serial.println("---");
+      Serial.println(F("---"));
     }
     if (i=='_') {
       debug_sid = !debug_sid;
-      Serial.printf("debug set to %i\n------\n", debug_sid);
-      return;
-    }
-    if (i=='M') {
-      static int oscMask = 1;
-      oscMask = oscMask << 1;
-      if (oscMask>15)
-        oscMask = 1;
-      sid.voice[0].setOscMask(oscMask<<4);
+      Serial.printf(F("debug set to %i\n------\n"), debug_sid);
       return;
     }
     if (i=='E') {
-      Serial.println("test_tones:");
+      Serial.println(F("test_tones:"));
       //hw.write(23,0xF1); //1ch filter
       //hw.write(24,0x0F); //volume
       /*sid.setCutoff(MAX_CUTOFF);
@@ -315,11 +335,11 @@ void loop() {
       sid.setFilterType(filter_lowpass);*/
       //sid.updateAll();
       sid.test_tones();
-      Serial.println("finished test_tones!");
+      Serial.println(F("finished test_tones!"));
       return;
     }
     if (i=='R') {
-      Serial.println("Resetting..");
+      Serial.println(F("Resetting.."));
       sid.resetChip();
       sid.voice[0].setADSR(0,0,15,5);
       sid.voice[1].setADSR(0,0,15,5);
@@ -343,18 +363,18 @@ void loop() {
       sid.voice[1].gateOff();
       sid.voice[2].gateOff();
       delay(1000);
-      Serial.println("Reset and should have beeped?");
+      Serial.println(F("Reset and should have beeped?"));
       return;
     }
     if (i=='D') {
       mode = 0;
-      Serial.println("Switching to Direct mode");
+      Serial.println(F("Switching to Direct mode"));
     } else if (i=='T') {
       mode = 1;
-      Serial.println("Switching to Table mode");
+      Serial.println(F("Switching to Table mode"));
     } else if (i=='N') {
       mode = 2;
-      Serial.println("Switching to Note loop mode");
+      Serial.println(F("Switching to Note loop mode"));
     }
     if (i=='K') {
       sid.voice[0].stopNote();
@@ -376,5 +396,5 @@ void loop() {
   else if (mode==2)
     note_loop();
   else 
-    Serial.printf("unknown mode %i?\n", mode);
+    Serial.printf(F("unknown mode %i?\n"), mode);
 }
