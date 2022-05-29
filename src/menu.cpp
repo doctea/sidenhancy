@@ -56,23 +56,19 @@ Menu *menu;// = Menu(&tft);
 #include "sid6581.h"
 
 void change_filter_cutoff(int last_value, int new_value) {
-    Serial.printf("change_filter_cutoff from %i to %i\n", last_value, new_value);
+    Serial.printf(F("change_filter_cutoff from %i to %i\n"), last_value, new_value);
     sid.setCutoff(new_value);
 }
 
 DirectNumberControl filter_cutoff_control("Filter cutoff", &sid.cutoff, sid.cutoff, 0, MAX_CUTOFF, change_filter_cutoff); //void (*on_change_handler)(int last_value, int new_value)) 
 //NumberControl(const char* label, int *in_target_variable, int start_value, int min_value, int max_value, void (*on_change_handler)(int last_value, int new_value)) 
 
-void null_func(int last, int next) {
+NumberControl CV1InputPanel("CV1 input", &ads_values[0], ads_values[0], 0, 4095, nullptr); //null_func);
+NumberControl CV2InputPanel("CV2 input", &ads_values[1], ads_values[1], 0, 4095, nullptr); //null_func);
 
-}
-
-//NumberControl CV1InputPanel("CV1 input", &ads_values[0], ads_values[0], 0, 4095, null_func);
-//NumberControl CV2InputPanel("CV2 input", &ads_values[1], ads_values[1], 0, 4095, null_func);
-
-MenuItem test_item_1 = MenuItem("test 1");
+/*MenuItem test_item_1 = MenuItem("test 1");
 MenuItem test_item_2 = MenuItem("test 2");
-MenuItem test_item_3 = MenuItem("test 3");
+MenuItem test_item_3 = MenuItem("test 3");*/
 
 void setup_menu() {
     /*menu.add(&posbar);
@@ -98,30 +94,30 @@ void setup_menu() {
 
     //menu = Menu(tft);        
 
-    Serial.println("Instantiating DisplayTranslator_SS_OLED.."); Serial.flush();
+    Serial.println(F("Instantiating DisplayTranslator_SS_OLED..")); Serial.flush();
     tft = new DisplayTranslator_SS_OLED();
     delay(50);
-    Serial.println("Finished DisplayTranslator_SS_OLED constructor"); Serial.flush();
-    Serial.println("Creating Menu object.."); Serial.flush();
+    Serial.println(F("Finished DisplayTranslator_SS_OLED constructor")); Serial.flush();
+    Serial.println(F("Creating Menu object..")); Serial.flush();
     menu = new Menu(tft);
-    Serial.printf("Done, free ram=");
+    Serial.printf(F("Done, free ram="));
     menu->debug_free_ram();
-    Serial.println("Created Menu object.."); Serial.flush();
+    Serial.println(F("Created Menu object..")); Serial.flush();
 
     filter_cutoff_control.setStep(32);
 
-    //CV1InputPanel.setReadOnly(true);
-    //CV2InputPanel.setReadOnly(true);
+    CV1InputPanel.setReadOnly(true);
+    CV2InputPanel.setReadOnly(true);
 
-    //menu->add(&CV1InputPanel);
-    //menu->add(&CV2InputPanel);
+    menu->add(&CV1InputPanel);
+    menu->add(&CV2InputPanel);
 
-    Serial.println("Adding test menu items..");
-    menu->add(&test_item_1);
+    Serial.println(F("Adding test menu items.."));
+    /*menu->add(&test_item_1);
     menu->add(&test_item_2);
-    menu->add(&test_item_3);
+    menu->add(&test_item_3);*/
     menu->add(&filter_cutoff_control);
-    Serial.println("Added test menu items!");
+    Serial.println(F("Added test menu items!"));
 
 }
 

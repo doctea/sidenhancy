@@ -119,7 +119,7 @@ void adc_direct_freq_loop() {
   float value2 = read_voltage(1);
   static uint16_t last_pw;
   uint16_t pulseWidth = 4095 * read_voltage(1);
-  Serial.printf("voltage: %i (%u)\n", (value2*100), pulseWidth);
+  Serial.printf(F("voltage: %i (%u)\n"), (value2*100), pulseWidth);
   //Serial.printf("Read channel 1: %i\n", pulseWidth); Serial.flush();
   //static int pulseWidth = 0;
   //pulseWidth+=32;

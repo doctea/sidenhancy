@@ -26,7 +26,7 @@ int read_value(int channel = 0) {
   //if (ADS.isReady()) {
     //value = ADS.getValue();
     value = ADS.readADC(channel);
-  //ads_values[channel] = value;
+  ads_values[channel] = value;
   //}
   return value;
   //return ADS.getLastValue();

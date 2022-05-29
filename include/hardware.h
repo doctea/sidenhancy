@@ -136,7 +136,7 @@ class Socket {
     void write(byte addr, byte data, char *msg = "") {
         //if (debug) 
         if ((byte)last_written[addr]!=data) {
-            if (debug) Serial.printf("Writing to\t%i\t[%02x]: "BYTE_TO_BINARY_PATTERN"\t[%02X] :: %s\n", addr, addr, BYTE_TO_BINARY(data), data, msg);
+            if (debug) Serial.printf(F("Writing to\t%i\t[%02x]: "BYTE_TO_BINARY_PATTERN"\t[%02X] :: %s\n"), addr, addr, BYTE_TO_BINARY(data), data, msg);
             setAddress(addr);
             setData(data);
             send();

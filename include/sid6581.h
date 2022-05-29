@@ -62,7 +62,7 @@ class Voice {
     // playing notes / frequency
     void playNote(byte note) {
         double freq = getFrequencyForNote(note);
-        Serial.printf("voice %i :: note %i: changing freq to %i (gap of %i)\n", voice_number, note, (uint16_t) freq, (uint16_t) freq-lastFrequency);
+        Serial.printf(F("voice %i :: note %i: changing freq to %i (gap of %i)\n"), voice_number, note, (uint16_t) freq, (uint16_t) freq-lastFrequency);
         lastFrequency = freq;
         curNote = note;
         setFrequency(freq, true);
@@ -149,7 +149,7 @@ class Voice {
 
     void updateControl() {
         // Set control register & data
-        if (debug_sid) Serial.printf("Updating control at %i with 0x%02X\n", VREG(CR), control);
+        if (debug_sid) Serial.printf(F("Updating control at %i with 0x%02X\n"), VREG(CR), control);
         hw->write(VREG(CR), control, (char*)"CR");
     }
 
@@ -185,9 +185,9 @@ class Voice {
 
     // envelopes
     void gateOn(bool immediate = true) {
-        if (debug_sid) Serial.printf("voice %i: gateOn starting with "BYTE_TO_BINARY_PATTERN, voice_number, BYTE_TO_BINARY(control));
+        if (debug_sid) Serial.printf(F("voice %i: gateOn starting with "BYTE_TO_BINARY_PATTERN), voice_number, BYTE_TO_BINARY(control));
         control |= gateMask;
-        if (debug_sid) Serial.printf(" and changed to "BYTE_TO_BINARY_PATTERN"\n", BYTE_TO_BINARY(control));
+        if (debug_sid) Serial.printf(F(" and changed to "BYTE_TO_BINARY_PATTERN"\n"), BYTE_TO_BINARY(control));
         if (immediate) updateControl();
     }
     void gateOff(bool immediate = true) {
@@ -269,19 +269,19 @@ class SID6581 {
 
     void printStatus() {
         Serial.println("-----status");
-        Serial.printf("Vol=%2i :: ", volume);
-        Serial.printf("Cutoff=%4i :: ", cutoff);
-        Serial.printf("Res=%2i :: ", resonance);
-        Serial.printf("filter_type=["BYTE_TO_BINARY_PATTERN"] :: ", BYTE_TO_BINARY(filter_type_mask));
-        Serial.printf("filter_voices=["BYTE_TO_BINARY_PATTERN"] :: ", BYTE_TO_BINARY(filter_voices));
-        if (filter_lowpass  & filter_type_mask) Serial.print("LP ");
-        if (filter_bandpass & filter_type_mask) Serial.print("BP ");
-        if (filter_highpass & filter_type_mask) Serial.print("HP ");
+        Serial.printf(F("Vol=%2i :: "), volume);
+        Serial.printf(F("Cutoff=%4i :: "), cutoff);
+        Serial.printf(F("Res=%2i :: "), resonance);
+        Serial.printf(F("filter_type=["BYTE_TO_BINARY_PATTERN"] :: "), BYTE_TO_BINARY(filter_type_mask));
+        Serial.printf(F("filter_voices=["BYTE_TO_BINARY_PATTERN"] :: "), BYTE_TO_BINARY(filter_voices));
+        if (filter_lowpass  & filter_type_mask) Serial.print(F("LP "));
+        if (filter_bandpass & filter_type_mask) Serial.print(F("BP "));
+        if (filter_highpass & filter_type_mask) Serial.print(F("HP "));
         Serial.println();
         for (int i = 0; i < 3 ; i++) {
             voice[i].printStatus();
         }
-        Serial.println("-status-----");
+        Serial.println(F("-status-----"));
     }
 
     SID6581() {};
@@ -351,12 +351,12 @@ class SID6581 {
     }
     void setFilterVoice(byte number, bool immediate = true) {
         filter_voices |= 1 << number;
-        Serial.printf("setFilterVoice(%i)\n", number);
+        Serial.printf(F("setFilterVoice(%i)\n"), number);
         if (immediate) updateFilterVoice();
     }
     void unsetFilterVoice(byte number, bool immediate = true) {
         filter_voices &= ~(1 << number);
-        Serial.printf("unsetFilterVoice(%i)\n", number);
+        Serial.printf(F("unsetFilterVoice(%i)\n"), number);
         if (immediate) updateFilterVoice();
     }
     void updateFilterVoice() {
@@ -375,12 +375,12 @@ class SID6581 {
         if (immediate) updateFilterType();
     }
     void setVolume(byte volume, bool immediate = true) {
-        Serial.printf("setVolume(%i) called\n", volume);
+        Serial.printf(F("setVolume(%i) called\n"), volume);
         this->volume = 0b00001111 & volume;
         if (immediate) updateFilterType();
     }
     void updateFilterType() {
-        Serial.printf("updateFilterVoice with filter_type_mask [%02x] and volume [%02x]\n", filter_type_mask, volume);
+        Serial.printf(F("updateFilterVoice with filter_type_mask [%02x] and volume [%02x]\n"), filter_type_mask, volume);
         hw.write(CREG(MODEVOL), filter_type_mask | volume, "MODEVOL");
     }
 
@@ -422,7 +422,7 @@ class SID6581 {
     }
 
     void setup() {
-        Serial.println("\n=================sid setup=================");
+        Serial.println(F("\n=================sid setup================="));
         hw.setup();
 
         resetChip();
@@ -509,7 +509,7 @@ class SID6581 {
 
         //test_tones();            
 
-        Serial.println("=================end sid setup=================");
+        Serial.println(F("=================end sid setup================="));
     }
 
     void tone(unsigned short i) {
