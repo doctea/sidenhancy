@@ -9,14 +9,14 @@ i2cEncoderLibV2 Encoder(0x01); /* A0 is soldered */
 
 //Callback when the CVAL is incremented
 void encoder_increment(i2cEncoderLibV2* obj) {
-  menu->knob_right();
+  menu->knob_left();
   Serial.print(F("Increment: "));
   Serial.println(Encoder.readCounterByte());
 }
 
 //Callback when the CVAL is decremented
 void encoder_decrement(i2cEncoderLibV2* obj) {
-  menu->knob_left();
+  menu->knob_right();
   Serial.print(F("Decrement: "));
   Serial.println(Encoder.readCounterByte());
 }

@@ -120,7 +120,7 @@ void adc_direct_freq_loop() {
   //Serial.printf("Read channel 0: %i\n", freq); Serial.flush();
   float value2 = read_voltage(1);
   static uint16_t last_pw;
-  uint16_t pulseWidth = 4095 * read_voltage(1);
+  uint16_t pulseWidth = 4095 * (read_voltage(1)/5.0);
   //Serial.printf(F("voltage: %i (%u)\n"), (value2*100), pulseWidth);
   //Serial.printf("Read channel 1: %i\n", pulseWidth); Serial.flush();
   //static int pulseWidth = 0;
@@ -210,7 +210,7 @@ void led_off() {
 }
 
 void loop() {
-  bool debug = true;
+  bool debug = false;
   static int mode = 0;
   static bool paused = false;
 
@@ -220,7 +220,7 @@ void loop() {
   menu->update_inputs();
   update_encoder();
 
-  static unsigned long last_drawn;
+  static unsigned long last_drawn = millis();
   if (millis() - last_drawn > 50) {
     if (debug) { Serial.println(F("updating display()!")); Serial.flush(); }
     menu->display();

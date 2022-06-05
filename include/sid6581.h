@@ -43,7 +43,7 @@ class Voice {
         Serial.printf(F("Att=%2i,Dec=%2i,Sus=%2i,Rel=%2i :: "), attack, decay, sustain, release);
         Serial.printf(F("PW=%2X :: "), pulseWidth);
         Serial.printf(F("Freq=%5u :: "), curFrequency);
-        Serial.printf(F("Control=["BYTE_TO_BINARY_PATTERN"]"), BYTE_TO_BINARY(control));
+        Serial.printf(F("Control=[" BYTE_TO_BINARY_PATTERN "]"), BYTE_TO_BINARY(control));
         Serial.println();
     }
 
