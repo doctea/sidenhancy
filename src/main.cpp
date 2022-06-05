@@ -114,13 +114,11 @@ void adc_loop() {
 }
 
 void adc_direct_freq_loop() {
-  static int last_freq;
+  static int last_freq = 0;
   //Serial.println("adc_direct_freq_loop().."); Serial.flush();
   int freq = get_frequency_for_voltage(read_voltage(0));
   //Serial.printf("Read channel 0: %i\n", freq); Serial.flush();
-  float value2 = read_voltage(1);
-  static uint16_t last_pw;
-  uint16_t pulseWidth = 4095 * (read_voltage(1)/5.0);
+  //float value2 = read_voltage(1);
   //Serial.printf(F("voltage: %i (%u)\n"), (value2*100), pulseWidth);
   //Serial.printf("Read channel 1: %i\n", pulseWidth); Serial.flush();
   //static int pulseWidth = 0;
@@ -128,35 +126,18 @@ void adc_direct_freq_loop() {
 
   if (freq!=last_freq) {
     //Serial.printf("got freq %i\n", freq);
-    /*sid.playNote(0,pitch);
-    sid.playNote(1,pitch);
-    sid.playNote(2,pitch);*/
-    
-    //sid.voice[0].setADSR(1,1,15,1);
-    //sid.voice[0].gateOn(); 
     sid.allGateOn();
     sid.setAllFrequency(freq);
-    //sid.voice[0].setFrequency(freq); 
-    //sid.voice[0].setPulseWidth(pulseWidth);
-    //sid.voice[0].setPulseWidth(pulseWidth);
-    //sid.voice[1].setADSR(1,1,15,1);
-    //sid.voice[1].gateOn(); 
-    //sid.voice[1].setFrequency(freq); 
-    //sid.voice[1].setPulseWidth(pulseWidth);
-    //sid.voice[2].setADSR(1,1,15,1);
-    //sid.voice[2].gateOn();
-    //sid.voice[2].setFrequency(freq);
-    //sid.voice[2].setPulseWidth(pulseWidth);
+    last_freq = freq;
   }
-  if (pulseWidth!=last_pw) {
-    //Serial.printf("new pulse width: %i\n", pulseWidth);
-    sid.voice[0].setPulseWidth(pulseWidth);
-    sid.voice[1].setPulseWidth(pulseWidth);
-    sid.voice[2].setPulseWidth(pulseWidth);
-  }
-  last_freq = freq;
-  last_pw = pulseWidth;
 
+  static uint16_t last_pw = 0;;
+  float pulseWidth = read_voltage(1)/5.0f;
+  if (pulseWidth!=last_pw) {
+    Serial.printf("new pulse width: %i\n", (int) (pulseWidth*100.0));
+    sid.modulateAllPulseWidths(pulseWidth);
+    last_pw = pulseWidth;
+  }
 }
 
 void note_loop() {

@@ -29,9 +29,11 @@ class Voice {
     byte control = 16;
     byte attack, decay, sustain, release;
     double lastFrequency, curFrequency = 0;
-    uint16_t pulseWidth;
 
     public:
+
+    uint16_t pulseWidth;
+
     Voice(Socket *hw, byte voice_number) {
         this->voice_number = voice_number;
         this->hw = hw;
@@ -153,13 +155,26 @@ class Voice {
         hw->write(VREG(CR), control, (char*)"CR");
     }
 
+    float pulsewidth_modulate = 0.0f;
     void setPulseWidth(uint16_t pw, bool immediate = true) {
         this->pulseWidth = pw & 0b0000111111111111;
         if (immediate) updatePulseWidth(); 
     }
     void updatePulseWidth() {
-        hw->write(VREG(PWHI), (uint8_t) (pulseWidth >> 8), (char*)"PWHI");
-        hw->write(VREG(PWLO), (uint8_t) (pulseWidth & 0b0000000011111111), (char*)"PWLO");
+        int16_t pw = pulseWidth & 0b0000111111111111;   // 12 bit
+        
+        int16_t modulation = pulsewidth_modulate * (4095/2);
+        pw += modulation;
+
+        pw = constrain(pw, 0, 4095);
+
+        hw->write(VREG(PWHI), (uint8_t) ((pw & 0b0000111111111111) >> 8), (char*)"PWHI");
+        hw->write(VREG(PWLO), (uint8_t) (pw & 0b0000000011111111), (char*)"PWLO");
+    }
+    void modulatePulseWidth(float normal) {
+        pulsewidth_modulate = normal;
+        Serial.printf("Modulating pulsewidths by %i\n", (uint16_t)(pulsewidth_modulate*(4095/2)));
+        updatePulseWidth();
     }
 
     void updateVoiceFrequency() {
@@ -385,6 +400,7 @@ class SID6581 {
     }
 
     int cutoff = MAX_CUTOFF/2;
+    float cutoff_modulation = 0.0f;
     void setCutoff(uint16_t cutoff, bool immediate = true) {
         //Serial.printf("Setting cutoff to %i", (cutoff));
         this->cutoff = cutoff & 0b0000111111111111;
@@ -394,9 +410,32 @@ class SID6581 {
         return this->cutoff & 0b0000111111111111;
     }
     void updateCutoff() {
-        uint16_t co = getCutoff();
+        int16_t co = getCutoff();
+        int16_t int_modulation = cutoff_modulation * (4096/2);
+        co += int_modulation;
         hw.write(CREG(FCHI), co >> 8, (char*)"FCHI");
         hw.write(CREG(FCLO), 0b0000000000001111 & co, (char*)"FCLO");
+    }
+    void modulateCutoff(float normal_modulation) {  // -1.0 to 1.0
+        cutoff_modulation = normal_modulation;
+    }
+
+    float getAllPulseWidths() {
+        return voice[0].pulseWidth / 4095.0f;
+    }
+    void setAllPulseWidths(float normal) {
+        int pw_value = normal*4095.0f;
+        Serial.printf("setAllPulseWidths() setting to %i\n", pw_value);
+        for (int i = 0 ; i < 3 ; i++) {
+            voice[i].setPulseWidth(pw_value);
+        }
+    }
+    float pulsewidth_modulation = 0.0f;
+    void modulateAllPulseWidths(float normal) {
+        pulsewidth_modulation = normal;
+        for (int i = 0 ; i < 3 ; i++) {
+            voice[i].modulatePulseWidth(normal);
+        }
     }
 
     void updateAll() {

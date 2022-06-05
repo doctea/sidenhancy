@@ -63,17 +63,31 @@ void change_filter_cutoff(int last_value, int new_value) {
     sid.setCutoff(new_value);
 }
 
-//DirectNumberControl filter_cutoff_control("Filter cutoff", &sid.cutoff, sid.cutoff, 0, MAX_CUTOFF, change_filter_cutoff); //void (*on_change_handler)(int last_value, int new_value)) 
-
-
+DirectNumberControl filter_cutoff_control("Filter cutoff", &sid.cutoff, sid.cutoff, 0, MAX_CUTOFF, change_filter_cutoff); //void (*on_change_handler)(int last_value, int new_value)) 
+//DirectNumberControl pulse_width_control("Pulse width", &sid.cutof, sid.cutoff, 0, MAX_CUTOFF, change_filter_cutoff); //void (*on_change_handler)(int last_value, int new_value)) 
 //NumberControl(const char* label, int *in_target_variable, int start_value, int min_value, int max_value, void (*on_change_handler)(int last_value, int new_value)) 
+
+int all_pulsewidth = 0;
+int getAllPulseWidth() {
+    //return sid.voice[0].pulseWidth * 2048;
+    all_pulsewidth;
+}
+void setAllPulseWidth(int pw) {
+    all_pulsewidth = pw;
+    sid.setAllPulseWidths(pw / 2048.0f);
+}
+void change_pulsewidth(int new_value, int old_value) {
+
+}
+
+DirectNumberControl pulse_width_control("Pulse width", getAllPulseWidth, setAllPulseWidth, 0, MAX_CUTOFF, change_pulsewidth);
 
 NumberControl CV1InputPanel("CV1 input", &ads_values[0], ads_values[0], 0, 4095, nullptr); //null_func);
 NumberControl CV2InputPanel("CV2 input", &ads_values[1], ads_values[1], 0, 4095, nullptr); //null_func);
 
-MenuItem test_item_1 = MenuItem("test 1");
+/*MenuItem test_item_1 = MenuItem("test 1");
 MenuItem test_item_2 = MenuItem("test 2");
-MenuItem test_item_3 = MenuItem("test 3");
+MenuItem test_item_3 = MenuItem("test 3");*/
 
 void setup_menu() {
     /*menu.add(&posbar);
@@ -111,7 +125,8 @@ void setup_menu() {
     menu->debug_free_ram();
     Serial.println(F("Created Menu object..")); Serial.flush();
 
-    //filter_cutoff_control.setStep(32);
+    filter_cutoff_control.setStep(32);
+    pulse_width_control.setStep(256);
 
     CV1InputPanel.setReadOnly(true);
     CV2InputPanel.setReadOnly(true);
@@ -119,12 +134,16 @@ void setup_menu() {
     menu->add(&CV1InputPanel);
     menu->add(&CV2InputPanel);
 
-    Serial.println(F("Adding test menu items.."));
+    /*Serial.println(F("Adding test menu items.."));
     menu->add(&test_item_1);
     menu->add(&test_item_2);
     menu->add(&test_item_3);
-    //menu->add(&filter_cutoff_control);
-    Serial.println(F("Added test menu items!"));
+    Serial.println(F("Added test menu items!"));*/
+
+    menu->add(&filter_cutoff_control);
+    menu->add(&pulse_width_control);
+
+    menu->mode = Menu::DISPLAY_ONE;
 
 }
 
