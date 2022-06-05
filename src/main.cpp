@@ -149,7 +149,7 @@ void adc_direct_freq_loop() {
     //sid.voice[2].setPulseWidth(pulseWidth);
   }
   if (pulseWidth!=last_pw) {
-    Serial.println(pulseWidth);
+    //Serial.printf("new pulse width: %i\n", pulseWidth);
     sid.voice[0].setPulseWidth(pulseWidth);
     sid.voice[1].setPulseWidth(pulseWidth);
     sid.voice[2].setPulseWidth(pulseWidth);
