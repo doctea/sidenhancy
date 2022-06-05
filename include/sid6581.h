@@ -158,14 +158,14 @@ class Voice {
         if (immediate) updatePulseWidth(); 
     }
     void updatePulseWidth() {
-        hw->write(VREG(PWHI), (uint8_t) (pulseWidth >> 8), "PWHI");
-        hw->write(VREG(PWLO), (uint8_t) (pulseWidth & 0b0000000011111111), "PWLO");
+        hw->write(VREG(PWHI), (uint8_t) (pulseWidth >> 8), (char*)"PWHI");
+        hw->write(VREG(PWLO), (uint8_t) (pulseWidth & 0b0000000011111111), (char*)"PWLO");
     }
 
     void updateVoiceFrequency() {
         uint16_t sid_frequency = getSIDFrequencyForFrequency(curFrequency);
-        hw->write(VREG(FREQLO), (uint8_t) (0b0000000011111111 & sid_frequency), "FREQLO");
-        hw->write(VREG(FREQHI), (uint8_t) (0b0000000011111111 & (sid_frequency >> 8)), "FREQHI");
+        hw->write(VREG(FREQLO), (uint8_t) (0b0000000011111111 & sid_frequency), (char*)"FREQLO");
+        hw->write(VREG(FREQHI), (uint8_t) (0b0000000011111111 & (sid_frequency >> 8)), (char*)"FREQHI");
     }
     
     // frequency calculation, either directly from passed-in double (eg from CV) or from a MIDI note
@@ -205,7 +205,7 @@ class Voice {
         if (immediate) updateAttackDecay();
     }
     void updateAttackDecay() {
-        hw->write(VREG(AD), attack << 4 | decay, "AD");
+        hw->write(VREG(AD), attack << 4 | decay, (char*)"AD");
     }
     
     // sustain and release are packed into same byte
@@ -218,7 +218,7 @@ class Voice {
         if (immediate) updateSustainRelease();
     }
     void updateSustainRelease() {
-        hw->write(VREG(SR), sustain << 4 | release, "SR");
+        hw->write(VREG(SR), sustain << 4 | release, (char*)"SR");
     }
 
     // helper function to set all ADSR params
@@ -307,7 +307,7 @@ class SID6581 {
     }
 
     void resetChip(void) {
-        Serial.println("------resetChip------");
+        Serial.println(F("------resetChip------"));
         int x = 10;
         
         // Bring reset high
@@ -338,7 +338,7 @@ class SID6581 {
         unsetFilterVoice(3);
 
         updateAll();
-        Serial.println("------end resetChip------");
+        Serial.println(F("------end resetChip------"));
     }
 
     byte resonance = MAX_RESONANCE / 2;
@@ -360,7 +360,7 @@ class SID6581 {
         if (immediate) updateFilterVoice();
     }
     void updateFilterVoice() {
-        hw.write(CREG(RESFILT), ((resonance<<4) | filter_voices), "RESFILT");
+        hw.write(CREG(RESFILT), ((resonance<<4) | filter_voices), (char*)"RESFILT");
     }
 
     // update filter TYPE mask and VOLUME
@@ -381,7 +381,7 @@ class SID6581 {
     }
     void updateFilterType() {
         Serial.printf(F("updateFilterVoice with filter_type_mask [%02x] and volume [%02x]\n"), filter_type_mask, volume);
-        hw.write(CREG(MODEVOL), filter_type_mask | volume, "MODEVOL");
+        hw.write(CREG(MODEVOL), filter_type_mask | volume, (char*)"MODEVOL");
     }
 
     int cutoff = MAX_CUTOFF/2;
@@ -395,8 +395,8 @@ class SID6581 {
     }
     void updateCutoff() {
         uint16_t co = getCutoff();
-        hw.write(CREG(FCHI), co >> 8, "FCHI");
-        hw.write(CREG(FCLO), 0b0000000000001111 & co, "FCLO");
+        hw.write(CREG(FCHI), co >> 8, (char*)"FCHI");
+        hw.write(CREG(FCLO), 0b0000000000001111 & co, (char*)"FCLO");
     }
 
     void updateAll() {

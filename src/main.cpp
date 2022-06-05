@@ -5,6 +5,8 @@
 #include "sid6581.h"
 #include "ads.h"
 
+#include "i2cencoder.h"
+
 //#include "display_ss.h"
 #ifdef ENABLE_SCREEN
   //#include "io.h"
@@ -119,7 +121,7 @@ void adc_direct_freq_loop() {
   float value2 = read_voltage(1);
   static uint16_t last_pw;
   uint16_t pulseWidth = 4095 * read_voltage(1);
-  Serial.printf(F("voltage: %i (%u)\n"), (value2*100), pulseWidth);
+  //Serial.printf(F("voltage: %i (%u)\n"), (value2*100), pulseWidth);
   //Serial.printf("Read channel 1: %i\n", pulseWidth); Serial.flush();
   //static int pulseWidth = 0;
   //pulseWidth+=32;
@@ -161,6 +163,8 @@ void note_loop() {
     //sid.test_tones();
     Serial.println(F("Looped!")); Serial.flush();
     static int value = 33;
+
+    //return;
 
     if (value>=80)
       value = 33;
@@ -206,16 +210,18 @@ void led_off() {
 }
 
 void loop() {
-  bool debug = false;
+  bool debug = true;
   static int mode = 0;
   static bool paused = false;
 
   if (debug) {  Serial.println(F("Start loop()!")); Serial.flush(); }
 
+  if (debug) { Serial.println(F("updating inputs()..")); Serial.flush(); }
+  menu->update_inputs();
+  update_encoder();
+
   static unsigned long last_drawn;
   if (millis() - last_drawn > 50) {
-    if (debug) { Serial.println(F("updating inputs()..")); Serial.flush(); }
-    menu->update_inputs();
     if (debug) { Serial.println(F("updating display()!")); Serial.flush(); }
     menu->display();
     if (debug) { Serial.println(F("done display()!")); Serial.flush(); }

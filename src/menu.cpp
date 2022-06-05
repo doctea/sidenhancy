@@ -10,18 +10,21 @@
 
 #include "ads.h"
 
+#include "i2cencoder.h"
+
 DisplayTranslator *tft;// = DisplayTranslator_SS_OLED();
 Menu *menu;// = Menu(&tft);
 
 
-#ifdef ENCODER_KNOB_L
+/*#ifdef ENCODER_KNOB_L
     Encoder knob(ENCODER_KNOB_L, ENCODER_KNOB_R);
     //extern Encoder knob;
 #endif
 #ifdef PIN_BUTTON_A
     Bounce pushButtonA = Bounce(PIN_BUTTON_A, 10); // 10ms debounce
     //extern Bounce pushButtonA;
-#endif
+#endif*/
+
 #ifdef PIN_BUTTON_B
     Bounce pushButtonB = Bounce(PIN_BUTTON_B, 10); // 10ms debounce
     //extern Bounce pushButtonB; 
@@ -60,15 +63,17 @@ void change_filter_cutoff(int last_value, int new_value) {
     sid.setCutoff(new_value);
 }
 
-DirectNumberControl filter_cutoff_control("Filter cutoff", &sid.cutoff, sid.cutoff, 0, MAX_CUTOFF, change_filter_cutoff); //void (*on_change_handler)(int last_value, int new_value)) 
+//DirectNumberControl filter_cutoff_control("Filter cutoff", &sid.cutoff, sid.cutoff, 0, MAX_CUTOFF, change_filter_cutoff); //void (*on_change_handler)(int last_value, int new_value)) 
+
+
 //NumberControl(const char* label, int *in_target_variable, int start_value, int min_value, int max_value, void (*on_change_handler)(int last_value, int new_value)) 
 
 NumberControl CV1InputPanel("CV1 input", &ads_values[0], ads_values[0], 0, 4095, nullptr); //null_func);
 NumberControl CV2InputPanel("CV2 input", &ads_values[1], ads_values[1], 0, 4095, nullptr); //null_func);
 
-/*MenuItem test_item_1 = MenuItem("test 1");
+MenuItem test_item_1 = MenuItem("test 1");
 MenuItem test_item_2 = MenuItem("test 2");
-MenuItem test_item_3 = MenuItem("test 3");*/
+MenuItem test_item_3 = MenuItem("test 3");
 
 void setup_menu() {
     /*menu.add(&posbar);
@@ -81,6 +86,8 @@ void setup_menu() {
     menu.add(&looper_harmony_status);   // todo: make this part of the LooperStatus object
     menu.add(&transpose_control);
     menu.add(&usbdevices_panel);*/
+
+    setup_encoder();
 
     #ifdef PIN_BUTTON_A
         pinMode(PIN_BUTTON_A, INPUT_PULLUP);
@@ -104,7 +111,7 @@ void setup_menu() {
     menu->debug_free_ram();
     Serial.println(F("Created Menu object..")); Serial.flush();
 
-    filter_cutoff_control.setStep(32);
+    //filter_cutoff_control.setStep(32);
 
     CV1InputPanel.setReadOnly(true);
     CV2InputPanel.setReadOnly(true);
@@ -113,10 +120,10 @@ void setup_menu() {
     menu->add(&CV2InputPanel);
 
     Serial.println(F("Adding test menu items.."));
-    /*menu->add(&test_item_1);
+    menu->add(&test_item_1);
     menu->add(&test_item_2);
-    menu->add(&test_item_3);*/
-    menu->add(&filter_cutoff_control);
+    menu->add(&test_item_3);
+    //menu->add(&filter_cutoff_control);
     Serial.println(F("Added test menu items!"));
 
 }
