@@ -9,7 +9,7 @@
 #include "LinkedList.h"
 
 FrequencyParameter param_overall_pitch          = FrequencyParameter<SID6581,double>(&sid, &SID6581::setAllFrequency);
-Parameter param_overall_pulsewidth_modulation   = Parameter<SID6581,float> (&sid, &SID6581::setAllPulseWidths);
+Parameter param_overall_pulsewidth_modulation   = Parameter<SID6581,float> (&sid, &SID6581::modulateAllPulseWidths);
 
 ADSParameterInput<ADS1115,Parameter<SID6581,double>>    input_A = ADSParameterInput<ADS1115,Parameter<SID6581,double>>(&ADS_OBJECT, 0, &param_overall_pitch);
 ADSParameterInput<ADS1115,Parameter<SID6581,float>>     input_B = ADSParameterInput<ADS1115,Parameter<SID6581,float>> (&ADS_OBJECT, 1, &param_overall_pulsewidth_modulation);
@@ -27,7 +27,7 @@ void setup_parameters() {
 void update_parameters() {
     //Serial.println("update_parameters..");
     input_A.loop();
-    input_B.loop();
+    //input_B.loop();
     /*for (int i = 0 ; i < 2 ; i++) {
         //param_inputs.get(i)->loop();
         //parameter_inputs[i]->loop();

@@ -200,9 +200,9 @@ class Voice {
 
     // envelopes
     void gateOn(bool immediate = true) {
-        if (debug_sid) Serial.printf(F("voice %i: gateOn starting with "BYTE_TO_BINARY_PATTERN), voice_number, BYTE_TO_BINARY(control));
+        if (debug_sid) Serial.printf(F("voice %i: gateOn starting with " BYTE_TO_BINARY_PATTERN), voice_number, BYTE_TO_BINARY(control));
         control |= gateMask;
-        if (debug_sid) Serial.printf(F(" and changed to "BYTE_TO_BINARY_PATTERN"\n"), BYTE_TO_BINARY(control));
+        if (debug_sid) Serial.printf(F(" and changed to " BYTE_TO_BINARY_PATTERN "\n"), BYTE_TO_BINARY(control));
         if (immediate) updateControl();
     }
     void gateOff(bool immediate = true) {
@@ -432,6 +432,9 @@ class SID6581 {
     }
     float pulsewidth_modulation = 0.0f;
     void modulateAllPulseWidths(float normal) {
+        Serial.print("sid#modulateAllPulseWidths(");
+        Serial.print(normal);
+        Serial.println(")");
         pulsewidth_modulation = normal;
         for (int i = 0 ; i < 3 ; i++) {
             voice[i].modulatePulseWidth(normal);
@@ -448,6 +451,9 @@ class SID6581 {
     }
 
     void setAllFrequency(double frequency) {
+        Serial.print("sid#setAllFrequency(");
+        Serial.print(frequency);
+        Serial.println(")");
         for (int i = 0 ; i < 3 ; i++) 
             voice[i].setFrequency(frequency);
     }

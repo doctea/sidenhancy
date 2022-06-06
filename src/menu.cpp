@@ -70,7 +70,7 @@ DirectNumberControl filter_cutoff_control("Filter cutoff", &sid.cutoff, sid.cuto
 int all_pulsewidth = 0;
 int getAllPulseWidth() {
     //return sid.voice[0].pulseWidth * 2048;
-    all_pulsewidth;
+    return all_pulsewidth;
 }
 void setAllPulseWidth(int pw) {
     all_pulsewidth = pw;
