@@ -1,0 +1,61 @@
+#include "sid6581.h"
+
+#include "ads.h"
+
+//#include "Parameter.h"
+//#include "ParameterInput.h"
+#include "ADSParameterInput.h"
+
+#include "LinkedList.h"
+
+Parameter param_overall_pitch                   = Parameter<SID6581,double>(&sid, &SID6581::setAllFrequency);
+Parameter param_overall_pulsewidth_modulation   = Parameter<SID6581,float>(&sid, &SID6581::setAllPulseWidths);
+
+ADSParameterInput<ADS1115,Parameter<SID6581,double>>    input_A = ADSParameterInput<ADS1115,Parameter<SID6581,double>>();
+ADSParameterInput<ADS1115,Parameter<SID6581,float>>     input_B = ADSParameterInput<ADS1115,Parameter<SID6581,float>>();
+
+//LinkedList<ParameterInput<Parameter>*> param_inputs = LinkedList<ParameterInput*>();
+
+void setup_parameters(SID6581 *sid) {
+    input_A.setTarget(&param_overall_pitch);
+    input_B.setTarget(&param_overall_pulsewidth_modulation);
+
+    //param_inputs.add(&pitch_input);
+    //param_inputs.add(&pulse_width_input);
+}
+
+void update_parameters() {
+    input_A.loop();
+    input_B.loop();
+    /*for (int i = 0 ; i < 2 ; i++) {
+        //param_inputs.get(i)->loop();
+        //parameter_inputs[i]->loop();
+    }*/
+}
+
+
+
+
+//LinkedList<ParameterInput<Parameter>*> param_inputs = LinkedList<ParameterInput*>();
+//ADSParameterInput<ADS1115, Parameter<SID6581,double>,double> pitch_input = ADSParameterInput<ADS1115,Parameter<SID6581,double>,double>(&ADS_OBJECT, 0, &param_overall_pitch);
+//ADSParameterInput<ADS1115, Parameter<SID6581,double>,double> pitch_input = ADSParameterInput<ADS1115,Parameter<SID6581,double>,double>(&ADS_OBJECT); //, 0);
+//ADSParameterInput<ADS1115, Parameter<SID6581,double>,double> pitch_input = ADSParameterInput<ADS1115,Parameter<SID6581,double>,double>(); //, 0);
+//ADSParameterInput<ADS1115, Parameter<SID6581>> pulse_width_input  = ADSParameterInput<ADS1115,Parameter<SID6581,double>,double>(&ADS, 1, &param_overall_pulsewidth_modulation);
+
+//ADSParameterInput<ADS1115, Parameter<SID6581,double>,double> input_A      = ADSParameterInput<ADS1115,Parameter<SID6581,double>,double>();
+//ADSParameterInput<ADS1115, Parameter<SID6581,float>,float>   input_B      = ADSParameterInput<ADS1115,Parameter<SID6581,float>,float>();
+
+
+//no matching function for call to 'ADSParameterInput<ADS1115, Parameter<SID6581, double>, double> :: ADSParameterInput(ADS1115*, int, Parameter<SID6581, double>*)'
+
+/*ParameterInput *parameter_inputs[2] = {
+    &pitch_input, //ADSParameterInput<double,ADS1115>(&ADS, 0, &overall_pitch),
+    &pulse_width_input, //&ADSParameterInput<float,ADS1115>(&ADS, 1, &overall_pulsewidth_modulation)
+};*/
+
+//LinkedList<ParameterInput*> param_inputs = LinkedList<ParameterInput*>();
+
+/*ADSParameterInput parameter_inputs[2] = {
+    pitch_input,
+    pulse_width_input,
+};*/
