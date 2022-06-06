@@ -27,7 +27,7 @@ void setup_parameters() {
 void update_parameters() {
     //Serial.println("update_parameters..");
     input_A.loop();
-    //input_B.loop();
+    input_B.loop();
     /*for (int i = 0 ; i < 2 ; i++) {
         //param_inputs.get(i)->loop();
         //parameter_inputs[i]->loop();
