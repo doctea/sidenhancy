@@ -173,7 +173,7 @@ class Voice {
     }
     void modulatePulseWidth(float normal) {
         pulsewidth_modulate = normal;
-        Serial.printf("Modulating pulsewidths by %i\n", (uint16_t)(pulsewidth_modulate*(4095/2)));
+        //if (debug) Serial.printf("Modulating pulsewidths by %i\n", (uint16_t)(pulsewidth_modulate*(4095/2)));
         updatePulseWidth();
     }
 
@@ -425,16 +425,16 @@ class SID6581 {
     }
     void setAllPulseWidths(float normal) {
         int pw_value = normal*4095.0f;
-        Serial.printf("setAllPulseWidths() setting to %i\n", pw_value);
+        //Serial.printf("setAllPulseWidths() setting to %i\n", pw_value);
         for (int i = 0 ; i < 3 ; i++) {
             voice[i].setPulseWidth(pw_value);
         }
     }
     float pulsewidth_modulation = 0.0f;
     void modulateAllPulseWidths(double normal) {
-        Serial.print("sid#modulateAllPulseWidths(");
+        /*Serial.print("sid#modulateAllPulseWidths(");
         Serial.print(normal);
-        Serial.println(")");
+        Serial.println(")");*/
         pulsewidth_modulation = normal;
         for (int i = 0 ; i < 3 ; i++) {
             voice[i].modulatePulseWidth(normal);
@@ -451,9 +451,9 @@ class SID6581 {
     }
 
     void setAllFrequency(double frequency) {
-        Serial.print("sid#setAllFrequency(");
+        /*Serial.print("sid#setAllFrequency(");
         Serial.print(frequency);
-        Serial.println(")");
+        Serial.println(")");*/
         for (int i = 0 ; i < 3 ; i++) 
             voice[i].setFrequency(frequency);
     }

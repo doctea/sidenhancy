@@ -12,9 +12,10 @@
 
 #include "i2cencoder.h"
 
+#include "sid_parameters.h"
+
 DisplayTranslator *tft;// = DisplayTranslator_SS_OLED();
 Menu *menu;// = Menu(&tft);
-
 
 /*#ifdef ENCODER_KNOB_L
     Encoder knob(ENCODER_KNOB_L, ENCODER_KNOB_R);
@@ -82,8 +83,8 @@ void change_pulsewidth(int new_value, int old_value) {
 
 DirectNumberControl pulse_width_control("Pulse width", getAllPulseWidth, setAllPulseWidth, 0, MAX_CUTOFF, change_pulsewidth);
 
-NumberControl CV1InputPanel("CV1 input", &ads_values[0], ads_values[0], 0, 4095, nullptr); //null_func);
-NumberControl CV2InputPanel("CV2 input", &ads_values[1], ads_values[1], 0, 4095, nullptr); //null_func);
+//NumberControl CV1InputPanel("CV1 input", &ads_values[0], ads_values[0], 0, 4095, nullptr); //null_func);
+//NumberControl CV2InputPanel("CV2 input", &ads_values[1], ads_values[1], 0, 4095, nullptr); //null_func);
 
 /*MenuItem test_item_1 = MenuItem("test 1");
 MenuItem test_item_2 = MenuItem("test 2");
@@ -128,11 +129,11 @@ void setup_menu() {
     filter_cutoff_control.setStep(32);
     pulse_width_control.setStep(256);
 
-    CV1InputPanel.setReadOnly(true);
-    CV2InputPanel.setReadOnly(true);
+    //CV1InputPanel.setReadOnly(true);
+    //CV2InputPanel.setReadOnly(true);
 
-    menu->add(&CV1InputPanel);
-    menu->add(&CV2InputPanel);
+    //menu->add(&CV1InputPanel);
+    //menu->add(&CV2InputPanel);
 
     /*Serial.println(F("Adding test menu items.."));
     menu->add(&test_item_1);
@@ -144,6 +145,8 @@ void setup_menu() {
     menu->add(&pulse_width_control);
 
     menu->mode = Menu::DISPLAY_ONE;
+
+    setup_parameter_menu();
 
 }
 
