@@ -44,7 +44,9 @@ class Voice {
         Serial.printf(F("Voice %i :: "), voice_number);
         Serial.printf(F("Att=%2i,Dec=%2i,Sus=%2i,Rel=%2i :: "), attack, decay, sustain, release);
         Serial.printf(F("PW=%2X :: "), pulseWidth);
-        Serial.printf(F("Freq=%5u :: "), curFrequency);
+        Serial.printf(F("Freq=")); //%5u :: "), curFrequency);
+        Serial.print(curFrequency);
+        Serial.print(" :: ");
         Serial.printf(F("Control=[" BYTE_TO_BINARY_PATTERN "]"), BYTE_TO_BINARY(control));
         Serial.println();
     }
@@ -192,6 +194,9 @@ class Voice {
     }
     uint16_t getSIDFrequencyForFrequency(double frequency) {
         return frequency / 0.059604645; // MAGIC from http://www.sidmusic.org/sid/sidtech2.html
+    }
+    void setFrequency(double frequency) {
+        this->setFrequency(frequency, true);
     }
     void setFrequency(double frequency, bool immediate = true) {
         curFrequency = frequency;
@@ -419,6 +424,9 @@ class SID6581 {
     void modulateCutoff(float normal_modulation) {  // -1.0 to 1.0
         cutoff_modulation = normal_modulation;
     }
+    void setCutoff(double cutoff) {
+        this->setCutoff((uint16_t)((double)cutoff * MAX_CUTOFF));
+    }
 
     float getAllPulseWidths() {
         return voice[0].pulseWidth / 4095.0f;
@@ -455,7 +463,7 @@ class SID6581 {
         Serial.print(frequency);
         Serial.println(")");*/
         for (int i = 0 ; i < 3 ; i++) 
-            voice[i].setFrequency(frequency);
+            voice[i].setFrequency(frequency,true);
     }
     void allGateOn() {
         for (int i = 0 ; i < 3 ; i++) 

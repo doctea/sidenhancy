@@ -61,13 +61,15 @@ Menu *menu;// = Menu(&tft);
 
 void change_filter_cutoff(int last_value, int new_value) {
     Serial.printf(F("change_filter_cutoff from %i to %i\n"), last_value, new_value);
-    sid.setCutoff(new_value);
+    sid.setCutoff((uint16_t)new_value);
 }
 
 DirectNumberControl filter_cutoff_control("Filter cutoff", &sid.cutoff, sid.cutoff, 0, MAX_CUTOFF, change_filter_cutoff); //void (*on_change_handler)(int last_value, int new_value)) 
 //DirectNumberControl pulse_width_control("Pulse width", &sid.cutof, sid.cutoff, 0, MAX_CUTOFF, change_filter_cutoff); //void (*on_change_handler)(int last_value, int new_value)) 
 //NumberControl(const char* label, int *in_target_variable, int start_value, int min_value, int max_value, void (*on_change_handler)(int last_value, int new_value)) 
 
+
+// pulse width base level stuff
 int all_pulsewidth = 0;
 int getAllPulseWidth() {
     //return sid.voice[0].pulseWidth * 2048;
@@ -77,31 +79,17 @@ void setAllPulseWidth(int pw) {
     all_pulsewidth = pw;
     sid.setAllPulseWidths(pw / 2048.0f);
 }
-void change_pulsewidth(int new_value, int old_value) {
-
-}
+void change_pulsewidth(int new_value, int old_value) {}
 
 DirectNumberControl pulse_width_control("Pulse width", getAllPulseWidth, setAllPulseWidth, 0, MAX_CUTOFF, change_pulsewidth);
 
 //NumberControl CV1InputPanel("CV1 input", &ads_values[0], ads_values[0], 0, 4095, nullptr); //null_func);
 //NumberControl CV2InputPanel("CV2 input", &ads_values[1], ads_values[1], 0, 4095, nullptr); //null_func);
-
 /*MenuItem test_item_1 = MenuItem("test 1");
 MenuItem test_item_2 = MenuItem("test 2");
 MenuItem test_item_3 = MenuItem("test 3");*/
 
 void setup_menu() {
-    /*menu.add(&posbar);
-    //menu.add(&mpk49_looper);
-    menu.add(&beatstep_notes);
-    menu.add(&bass_transpose_control);  // beatstep transposed to neutron control
-    menu.add(&sequencer_status);
-    menu.add(&mpk49_looper_status);
-    menu.add(&quantizer_setting);       // todo: make this part of the LooperStatus object
-    menu.add(&looper_harmony_status);   // todo: make this part of the LooperStatus object
-    menu.add(&transpose_control);
-    menu.add(&usbdevices_panel);*/
-
     setup_encoder();
 
     #ifdef PIN_BUTTON_A

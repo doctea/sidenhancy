@@ -119,7 +119,7 @@ void adc_loop() {
 }
 
 void adc_direct_freq_loop() {
-  sid.allGateOn();
+  //sid.allGateOn();
 
   return; 
   static int last_freq = 0;
@@ -280,7 +280,7 @@ void loop() {
     if (i=='Q') {
       sid.setResonance(15);
       for (int i = MAX_CUTOFF ; i > 0 ; i--) {
-        sid.setCutoff(i);
+        sid.setCutoff((uint16_t)i);
         //Serial.printf("Cutoff=%i\n",i);
         //delay(1);
       }
@@ -299,12 +299,12 @@ void loop() {
     }
     if(i=='+') {
       if (sid.cutoff>=MAX_CUTOFF) sid.cutoff = MAX_CUTOFF/2;
-      sid.setCutoff(sid.getCutoff()+1);
+      sid.setCutoff((uint16_t)(sid.getCutoff()+1));
       return;
     }
     if(i=='-') {
       if (sid.cutoff<=0) sid.cutoff = MAX_CUTOFF;
-      sid.setCutoff(sid.getCutoff()-1);
+      sid.setCutoff((uint16_t)(sid.getCutoff()-1));
       return;
     }
     if (i=='U') {
@@ -335,16 +335,23 @@ void loop() {
       Serial.println(F("finished test_tones!"));
       return;
     }
+    if (i=='1') sid.voice[0].gateOff();
+    if (i=='!') sid.voice[0].gateOn();
+    if (i=='2') sid.voice[1].gateOff();
+    if (i=='"') sid.voice[1].gateOn();
+    if (i=='3') sid.voice[2].gateOff();
+    if (i=='4') sid.voice[2].gateOn();
+
     if (i=='R') {
       Serial.println(F("Resetting.."));
       sid.resetChip();
       sid.voice[0].setADSR(0,0,15,5);
       sid.voice[1].setADSR(0,0,15,5);
       sid.voice[2].setADSR(0,0,15,5);
-      sid.voice[0].setFrequency(MAX_FREQ/2);
-      sid.voice[1].setFrequency(MAX_FREQ/2);
-      sid.voice[2].setFrequency(MAX_FREQ/2);
-      sid.unsetFilterType(triMask | sawMask | pulseMask);
+      sid.voice[0].setFrequency(MAX_FREQ/2,true);
+      sid.voice[1].setFrequency(MAX_FREQ/2,true);
+      sid.voice[2].setFrequency(MAX_FREQ/2,true);
+      //sid.unsetFilterType(triMask | sawMask | pulseMask);
       sid.unsetFilterVoice(0,false);
       sid.unsetFilterVoice(1,false);
       sid.unsetFilterVoice(2,false);
