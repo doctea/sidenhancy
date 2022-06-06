@@ -287,8 +287,8 @@ class SID6581 {
         Serial.printf(F("Vol=%2i :: "), volume);
         Serial.printf(F("Cutoff=%4i :: "), cutoff);
         Serial.printf(F("Res=%2i :: "), resonance);
-        Serial.printf(F("filter_type=["BYTE_TO_BINARY_PATTERN"] :: "), BYTE_TO_BINARY(filter_type_mask));
-        Serial.printf(F("filter_voices=["BYTE_TO_BINARY_PATTERN"] :: "), BYTE_TO_BINARY(filter_voices));
+        Serial.printf(F("filter_type=[" BYTE_TO_BINARY_PATTERN "] :: "), BYTE_TO_BINARY(filter_type_mask));
+        Serial.printf(F("filter_voices=[" BYTE_TO_BINARY_PATTERN "] :: "), BYTE_TO_BINARY(filter_voices));
         if (filter_lowpass  & filter_type_mask) Serial.print(F("LP "));
         if (filter_bandpass & filter_type_mask) Serial.print(F("BP "));
         if (filter_highpass & filter_type_mask) Serial.print(F("HP "));
@@ -431,7 +431,7 @@ class SID6581 {
         }
     }
     float pulsewidth_modulation = 0.0f;
-    void modulateAllPulseWidths(float normal) {
+    void modulateAllPulseWidths(double normal) {
         Serial.print("sid#modulateAllPulseWidths(");
         Serial.print(normal);
         Serial.println(")");
@@ -562,11 +562,11 @@ class SID6581 {
         #define FREQLO 0
         #define FREQHI 1
         #define CR 4
-        hw.write(0+voice3_base,i);
-        hw.write(FREQHI+voice3_base,i>>8);
-        hw.write(CR+voice3_base,17);
+        hw.write(0+voice3_base,i,"tone:voice3_base");
+        hw.write(FREQHI+voice3_base,i>>8,"tone:voice3_freqhi");
+        hw.write(CR+voice3_base,17,"tone:cr");
         delay(200);
-        hw.write(CR+voice3_base,16);
+        hw.write(CR+voice3_base,16,"tone:cr");
 
         /*voice[3].setFrequency(i);
         voice[3].triOn();
