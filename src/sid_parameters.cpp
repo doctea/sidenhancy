@@ -2,29 +2,30 @@
 
 #include "ads.h"
 
-//#include "Parameter.h"
+#include "FrequencyParameter.h"
 //#include "ParameterInput.h"
 #include "ADSParameterInput.h"
 
 #include "LinkedList.h"
 
-Parameter param_overall_pitch                   = Parameter<SID6581,double>(&sid, &SID6581::setAllFrequency);
-Parameter param_overall_pulsewidth_modulation   = Parameter<SID6581,float>(&sid, &SID6581::setAllPulseWidths);
+FrequencyParameter param_overall_pitch          = FrequencyParameter<SID6581,double>(&sid, &SID6581::setAllFrequency);
+Parameter param_overall_pulsewidth_modulation   = Parameter<SID6581,float> (&sid, &SID6581::setAllPulseWidths);
 
-ADSParameterInput<ADS1115,Parameter<SID6581,double>>    input_A = ADSParameterInput<ADS1115,Parameter<SID6581,double>>();
-ADSParameterInput<ADS1115,Parameter<SID6581,float>>     input_B = ADSParameterInput<ADS1115,Parameter<SID6581,float>>();
+ADSParameterInput<ADS1115,Parameter<SID6581,double>>    input_A = ADSParameterInput<ADS1115,Parameter<SID6581,double>>(&ADS_OBJECT, 0, &param_overall_pitch);
+ADSParameterInput<ADS1115,Parameter<SID6581,float>>     input_B = ADSParameterInput<ADS1115,Parameter<SID6581,float>> (&ADS_OBJECT, 1, &param_overall_pulsewidth_modulation);
 
 //LinkedList<ParameterInput<Parameter>*> param_inputs = LinkedList<ParameterInput*>();
 
-void setup_parameters(SID6581 *sid) {
-    input_A.setTarget(&param_overall_pitch);
-    input_B.setTarget(&param_overall_pulsewidth_modulation);
+void setup_parameters() {
+    //input_A.setTarget(&param_overall_pitch);
+    //input_B.setTarget(&param_overall_pulsewidth_modulation);
 
     //param_inputs.add(&pitch_input);
     //param_inputs.add(&pulse_width_input);
 }
 
 void update_parameters() {
+    //Serial.println("update_parameters..");
     input_A.loop();
     input_B.loop();
     /*for (int i = 0 ; i < 2 ; i++) {

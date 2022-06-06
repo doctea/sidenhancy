@@ -3,7 +3,8 @@
 #include "Config.h"
 
 #include "sid6581.h"
-#include "ads.h"
+
+#include "sid_parameters.h"
 
 #include "i2cencoder.h"
 
@@ -39,6 +40,10 @@ void setup() {
     Serial.println(F("\tsid initialised!"));
 
     setup_ads();
+
+    Serial.println(F("Setting up parameters.."));
+    setup_parameters();
+    Serial.println(F("Parameter setup done!"));
 
     #ifdef ENABLE_SCREEN
       Serial.println(F("\tSetting up display.."));
@@ -114,6 +119,9 @@ void adc_loop() {
 }
 
 void adc_direct_freq_loop() {
+  sid.allGateOn();
+
+  return; 
   static int last_freq = 0;
   //Serial.println("adc_direct_freq_loop().."); Serial.flush();
   int freq = get_frequency_for_voltage(read_voltage(0));
@@ -200,6 +208,8 @@ void loop() {
   if (debug) { Serial.println(F("updating inputs()..")); Serial.flush(); }
   menu->update_inputs();
   update_encoder();
+
+  update_parameters();
 
   static unsigned long last_drawn = millis();
   if (millis() - last_drawn > 50) {
