@@ -1,0 +1,126 @@
+#ifndef MENU_MIDI_MAPPER__INCLUDED
+#define MENU_MIDI_MAPPER__INCLUDED
+
+#include "Config.h"
+
+#include "menuitems.h"
+#include "Parameter.h"
+
+#include "sid_parameters.h"
+
+// TODO: genericise this and move it into parameters/ParameterMenuItems.h library
+// TODO: this is based on a tweaked version of the MIDIOutputSelectorControl from the usb_midi_clocker project, merge the two functionalities to make generic
+class ParameterSelectorControl : public SelectorControl {
+    int actual_value_index;
+    //void (*setter_func)(BaseParameter *midi_output);
+    BaseParameterInput *parameter_input = nullptr;
+    //void(BaseParameterInput::*setter_func)(BaseParameter *target_parameter);
+    BaseParameter *initial_selected_parameter;
+
+    public:
+
+    ParameterSelectorControl(const char *label) : SelectorControl(label, 0) {};
+/*        SelectorControl(label, 0) {
+        //strcpy(this->label, label);
+        this->setter_func = setter_func;
+        //this->initial_selected_parameter = initial_selected_parameter;
+    }*/
+
+    virtual void configure (BaseParameterInput *parameter_input) { //}, void (*setter_func)(BaseParameter*)) {
+        this->parameter_input = parameter_input;
+        //this->setter_func = setter_func;
+        this->initial_selected_parameter = this->parameter_input->target_parameter;
+        Serial.printf("ParameterSelectorControl configured control labelled '%s' with initial_selected_parameter '%s'@%p from parameter_input @ %p\n", label, initial_selected_parameter->label, initial_selected_parameter, parameter_input);
+        //Serial.printf("%u and %u\n", this->initial_selected_parameter, this->setter_func);
+    }
+
+    virtual void on_add() {
+        actual_value_index = -1;
+        Serial.println("on_add()");
+        Serial.printf("\tParameterSelectorControl@ %u...\n", initial_selected_parameter);
+        Serial.printf("\tParameterSelectorControl looking for '%s' at %p...\n", initial_selected_parameter->label, initial_selected_parameter);
+
+        this->actual_value_index = find_parameter_index_for_label(initial_selected_parameter->label);
+        this->selected_value_index = this->actual_value_index;
+    }
+
+    virtual const char* get_label_for_index(int index) {
+        /*char label[20];
+        strcpy(available_parameters.get(index)->label, label);
+        return label;*/
+        return available_parameters.get(index)->label;
+    }
+
+    virtual void setter (int new_value) {
+        Serial.printf("ParameterSelectorControl changing from %i to %i\n", this->actual_value_index, new_value);
+        actual_value_index = new_value;
+        selected_value_index = actual_value_index;
+        if (this->parameter_input!=nullptr) {
+            this->parameter_input->setTarget(available_parameters.get(new_value));
+        }
+        /*if (this->setter_func!=nullptr) {
+            Serial.printf("setting new output\n");
+            this->setter_func(available_parameters.get(new_value));
+        }*/
+    }
+    virtual int getter () {
+        return selected_value_index;
+    }
+
+    // classic fixed display version
+    virtual int display(Coord pos, bool selected, bool opened) override {
+        //Serial.println("MidiOutputSelectorControl display()!");
+        tft->setTextSize(0);
+
+        pos.y = header(label, pos, selected, opened);
+        
+        num_values = NUM_AVAILABLE_PARAMETERS;
+
+        //tft->setTextSize(1);
+
+        if (!opened) {
+            // not selected, so just show the current value
+            //colours(opened && selected_value_index==i, col, BLACK);
+
+            tft->printf((char*)"%s", (char*)get_label_for_index(selected_value_index));
+            tft->println((char*)"");
+        } else {
+            // selected, so show the possible values to select from
+            int current_value = actual_value_index; //this->getter();
+
+            int start_value = 0;
+            if (!tft->will_x_rows_fit_to_height(selected_value_index)) {
+                Serial.printf("setting start_value to %i for selected_value_index %i\n", start_value, selected_value_index);
+                start_value = current_value;
+            }
+
+            for (int i = start_value ; i < num_values ; i++) {
+                bool is_current_value_selected = i==current_value;
+                int col = is_current_value_selected ? GREEN : C_WHITE;
+                colours(opened && selected_value_index==i, col, BLACK);
+                tft->printf((char*)"%s\n", (char*)get_label_for_index(i));
+                //tft->setTextColor(BLACK,BLACK);
+            }
+            if (tft->getCursorX()>0) // if we haven't wrapped onto next line then do it manually
+                tft->println((char*)"");
+        }
+        return tft->getCursorY();
+    }
+
+    virtual bool button_select() {
+        //Serial.printf("button_select with selected_value_index %i\n", selected_value_index);
+        //Serial.printf("that is available_values[%i] of %i\n", selected_value_index, available_values[selected_value_index]);
+        this->setter(selected_value_index);
+
+        char msg[255];
+        //Serial.printf("about to build msg string...\n");
+        sprintf(msg, "Set %s to %s (%i)", label, get_label_for_index(selected_value_index), selected_value_index);
+        //Serial.printf("about to set_last_message!");
+        msg[20] = '\0'; // limit the string so we don't overflow set_last_message
+        menu_set_last_message(msg,GREEN);
+        return false;
+    }
+
+};
+
+#endif

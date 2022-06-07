@@ -342,6 +342,8 @@ void loop() {
     if (i=='3') sid.voice[2].gateOff();
     if (i=='4') sid.voice[2].gateOn();
 
+    if (i=='0') setup_encoder();
+
     if (i=='R') {
       Serial.println(F("Resetting.."));
       sid.resetChip();
