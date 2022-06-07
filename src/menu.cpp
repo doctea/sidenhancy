@@ -134,8 +134,6 @@ void setup_menu() {
 
     menu->mode = Menu::DISPLAY_ONE;
 
-    setup_parameter_menu();
-
 }
 
 #endif

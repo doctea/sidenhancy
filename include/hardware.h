@@ -114,6 +114,7 @@ class Socket {
         delayMicroseconds(2);
     }
 
+    // set the SID address bus pins
     void setAddress(byte what) {
         digitalWrite( SID6581_PIN_A0, CHECK_BIT(what,1)?HIGH:LOW );
         digitalWrite( SID6581_PIN_A1, CHECK_BIT(what,2)?HIGH:LOW );
@@ -122,6 +123,7 @@ class Socket {
         digitalWrite( SID6581_PIN_A4, CHECK_BIT(what,16)?HIGH:LOW );
     }
 
+    // set the SID data bus pins
     void setData(byte what) {
         digitalWrite( SID6581_PIN_D0, CHECK_BIT(what,1)?HIGH:LOW );
         digitalWrite( SID6581_PIN_D1, CHECK_BIT(what,2)?HIGH:LOW );
@@ -133,6 +135,7 @@ class Socket {
         digitalWrite( SID6581_PIN_D7, CHECK_BIT(what,128)?HIGH:LOW );
     }
 
+    // write a register to the SID
     void write(byte addr, byte data, char *msg = "") {
         //if (debug) 
         if ((byte)last_written[addr]!=data) {

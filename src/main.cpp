@@ -53,6 +53,8 @@ void setup() {
     setup_parameters();
     Serial.println(F("Parameter setup done!"));
     
+    setup_parameter_menu();
+
     Serial.println(F("exiting setup()\n\n"));
 }
 
