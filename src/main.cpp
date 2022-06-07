@@ -41,10 +41,6 @@ void setup() {
 
     setup_ads();
 
-    Serial.println(F("Setting up parameters.."));
-    setup_parameters();
-    Serial.println(F("Parameter setup done!"));
-
     #ifdef ENABLE_SCREEN
       Serial.println(F("\tSetting up display.."));
       setup_menu();
@@ -52,6 +48,10 @@ void setup() {
       Serial.println(F("\tFinished initialising display!"));
       //tft_print("hello", 0, 0);
     #endif
+
+    Serial.println(F("Setting up parameters.."));
+    setup_parameters();
+    Serial.println(F("Parameter setup done!"));
     
     Serial.println(F("exiting setup()\n\n"));
 }

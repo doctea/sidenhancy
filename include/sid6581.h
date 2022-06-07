@@ -552,13 +552,13 @@ class SID6581 {
         voice[1].gateOn(true);
         voice[2].gateOn(true);
 
-        delay(1000);
+        delay(100);
         voice[0].gateOff(true);
-        delay(1000);
+        delay(100);
         voice[1].gateOff(true);
-        delay(1000);
+        delay(100);
         voice[2].gateOff(true);
-        delay(1000);
+        delay(100);
 
         //test_tones();            
 

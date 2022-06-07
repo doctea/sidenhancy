@@ -11,7 +11,7 @@
 // TODO: genericise this and move it into parameters/ParameterMenuItems.h library
 // TODO: this is based on a tweaked version of the MIDIOutputSelectorControl from the usb_midi_clocker project, merge the two functionalities to make generic
 class ParameterSelectorControl : public SelectorControl {
-    int actual_value_index;
+    int actual_value_index = -1;
     //void (*setter_func)(BaseParameter *midi_output);
     BaseParameterInput *parameter_input = nullptr;
     //void(BaseParameterInput::*setter_func)(BaseParameter *target_parameter);
@@ -32,6 +32,7 @@ class ParameterSelectorControl : public SelectorControl {
         this->initial_selected_parameter = this->parameter_input->target_parameter;
         Serial.printf("ParameterSelectorControl configured control labelled '%s' with initial_selected_parameter '%s'@%p from parameter_input @ %p\n", label, initial_selected_parameter->label, initial_selected_parameter, parameter_input);
         //Serial.printf("%u and %u\n", this->initial_selected_parameter, this->setter_func);
+        actual_value_index = find_parameter_index_for_label(initial_selected_parameter->label);
     }
 
     virtual void on_add() {
@@ -80,29 +81,52 @@ class ParameterSelectorControl : public SelectorControl {
 
         if (!opened) {
             // not selected, so just show the current value
-            //colours(opened && selected_value_index==i, col, BLACK);
+            colours(false, C_WHITE, BLACK);
 
-            tft->printf((char*)"%s", (char*)get_label_for_index(selected_value_index));
+            tft->printf((char*)"%s", (char*)get_label_for_index(actual_value_index));
             tft->println((char*)"");
+            //tft->printf("%i%\n", 100 * parameter_input->target_parameter->getCurrentValue());
+            tft->printf("cv: %s?", (char*)parameter_input->target_parameter->getFormattedValue());
+            Serial.printf("%i", parameter_input->target_parameter->getCurrentValue());
+            Serial.printf("got formatted value in selector display: %s\n", parameter_input->target_parameter->getFormattedValue());
         } else {
+            // calculate available viewport size
+            /*int viewport_size = tft->height() - tft->getCursorY();
+            if (num_values < viewport_size) viewport_size = num_values;
+            Serial.printf("viewport_size is %i\n", viewport_size);
+            int currentValue = actual_value_index; //this->getter();
+            for (int i = 0 ; i < viewport_size ; i++) {
+            }*/
+                      
             // selected, so show the possible values to select from
             int current_value = actual_value_index; //this->getter();
 
+            if (selected_value_index==-1) selected_value_index = actual_value_index;
+
             int start_value = 0;
             if (!tft->will_x_rows_fit_to_height(selected_value_index)) {
-                Serial.printf("setting start_value to %i for selected_value_index %i\n", start_value, selected_value_index);
-                start_value = current_value;
+                start_value = selected_value_index;
+                //Serial.printf("\n| setting start_value to %i for selected_value_index %i: ", start_value, selected_value_index);
+            } else {
+                //Serial.printf("\n| keeping start_value to %i for selected_value_index %i: ", start_value, selected_value_index);
             }
+            Serial.printf("%s :: ", (char*)get_label_for_index(selected_value_index));
+            Serial.print("\n");
 
+            int actual_count = 0;
             for (int i = start_value ; i < num_values ; i++) {
                 bool is_current_value_selected = i==current_value;
                 int col = is_current_value_selected ? GREEN : C_WHITE;
                 colours(opened && selected_value_index==i, col, BLACK);
-                tft->printf((char*)"%s\n", (char*)get_label_for_index(i));
+                //Serial.printf("\tactual_count=%i, i=%i, name=%s, invert=%i, cursorY=%i\n", actual_count, i, get_label_for_index(i), opened && selected_value_index==i, tft->getCursorY());
+                //tft->printf((char*)"%s\n", (char*)get_label_for_index(i));
+                tft->printf((char*)get_label_for_index(i));
+                if (tft->getCursorY()>tft->height()) break;
+                //tft->println((char*)get_label_for_index(i));
                 //tft->setTextColor(BLACK,BLACK);
             }
             if (tft->getCursorX()>0) // if we haven't wrapped onto next line then do it manually
-                tft->println((char*)"");
+                tft->println((char*)"\n");
         }
         return tft->getCursorY();
     }

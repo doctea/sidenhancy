@@ -64,9 +64,9 @@ void change_filter_cutoff(int last_value, int new_value) {
     sid.setCutoff((uint16_t)new_value);
 }
 
-DirectNumberControl filter_cutoff_control("Filter cutoff", &sid.cutoff, sid.cutoff, 0, MAX_CUTOFF, change_filter_cutoff); //void (*on_change_handler)(int last_value, int new_value)) 
-//DirectNumberControl pulse_width_control("Pulse width", &sid.cutof, sid.cutoff, 0, MAX_CUTOFF, change_filter_cutoff); //void (*on_change_handler)(int last_value, int new_value)) 
-//NumberControl(const char* label, int *in_target_variable, int start_value, int min_value, int max_value, void (*on_change_handler)(int last_value, int new_value)) 
+DirectNumberControl filter_cutoff_control("Filter cutoff", &sid.cutoff, sid.cutoff, 0, MAX_CUTOFF, change_filter_cutoff); //void (*on_change_handler)(int lastValue, int new_value)) 
+//DirectNumberControl pulse_width_control("Pulse width", &sid.cutof, sid.cutoff, 0, MAX_CUTOFF, change_filter_cutoff); //void (*on_change_handler)(int lastValue, int new_value)) 
+//NumberControl(const char* label, int *in_target_variable, int start_value, int min_value, int max_value, void (*on_change_handler)(int lastValue, int new_value)) 
 
 
 // pulse width base level stuff
