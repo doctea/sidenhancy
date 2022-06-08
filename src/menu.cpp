@@ -114,6 +114,9 @@ void setup_menu() {
     menu->debug_free_ram();
     Serial.println(F("Created Menu object..")); Serial.flush();
 
+    // set menu to only display one control at a time
+    menu->mode = Menu::DISPLAY_ONE;
+
     filter_cutoff_control.setStep(32);
     pulse_width_control.setStep(256);
 
@@ -131,8 +134,6 @@ void setup_menu() {
 
     menu->add(&filter_cutoff_control);
     menu->add(&pulse_width_control);
-
-    menu->mode = Menu::DISPLAY_ONE;
 
 }
 
