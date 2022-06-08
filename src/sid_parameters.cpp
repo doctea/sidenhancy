@@ -12,6 +12,8 @@
 
 #include "LinkedList.h"
 
+BaseParameter param_none                        = BaseParameter("None");
+
 FrequencyParameter param_overall_pitch          = FrequencyParameter<SID6581,double> ("Overall pitch\0", &sid, &SID6581::setAllFrequency);
 Parameter param_overall_pulsewidth_modulation   = Parameter<SID6581,double> ("Overall PW Mod\0", &sid, &SID6581::modulateAllPulseWidths);
 
@@ -41,6 +43,7 @@ void setup_parameters() {
     //input_A.setTarget(&param_overall_pitch);
     //input_B.setTarget(&param_overall_pulsewidth_modulation);
 
+    available_parameters.add(&param_none);
     available_parameters.add(&param_overall_pitch);
     available_parameters.add(&param_overall_pulsewidth_modulation);
     available_parameters.add(&param_filter_cutoff);
