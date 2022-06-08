@@ -563,6 +563,7 @@ class SID6581 {
         //test_tones();            
 
         Serial.println(F("=================end sid setup================="));
+        //while(1) {};
     }
 
     void tone(unsigned short i) {

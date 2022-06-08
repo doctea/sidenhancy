@@ -17,12 +17,7 @@ void setup_parameter_menu();
     BaseParameter *parameter;
 };*/
 
-extern LinkedList<BaseParameterInput*> param_inputs;
-
+extern LinkedList<BaseParameterInput*> available_inputs;
 extern LinkedList<BaseParameter*> available_parameters;
-
-#define NUM_AVAILABLE_PARAMETERS (available_parameters.size())
-
-int find_parameter_index_for_label(char *label);
 
 #endif
