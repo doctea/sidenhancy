@@ -2,6 +2,9 @@
 
 - Eurorack module based around the ARMSID SID chip clone
 - Based around Atmega 1284p
+ - oled display and rotary encoder options
+ - CV inputs assignable to SID parameters
+- Using [mymenu](https://github.com/doctea/mymenu) and [parameters](https://github.com/doctea/parameters)
 
 ## Todo
 
@@ -39,6 +42,7 @@
     - three of them for each oscillator?
   - Filter cutoff
   - Assignable input?
+- LFOs etc
 - MIDI input
 - Schematic
 - PCB + panel
