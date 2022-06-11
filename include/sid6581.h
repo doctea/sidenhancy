@@ -9,7 +9,7 @@
 
 #include "sidspec.h"
 
-#include "ads.h"    // for get_voltage_for_frequency
+//#include "ads.h"    // for get_voltage_for_frequency
 
 // get current voice register offset
 #define VREG(X)     (get_base_register_address() + offsetof(voicemap,X))
@@ -204,7 +204,7 @@ class Voice {
                 440*2^(19.56/1200) = 444.9994 Hz.*/
             //double frequency_target = (pow(frequency, 1.0/12.0));
             double frequency_target = frequency * (pow(2.0,(modulation_normal*100.0)/1200.0));
-            Serial.printf("For frequency %i, found what should be frequency one semitone above, ==%i\n", (uint32_t) frequency, (uint32_t) (frequency_target));
+            //Serial.printf("For frequency %i, found what should be frequency one semitone above, ==%i\n", (uint32_t) frequency, (uint32_t) frequency_target);
             return (frequency_target - frequency) * modulation_normal;
         } else {
             // get modulation vs the note down from frequency
@@ -212,7 +212,8 @@ class Voice {
             // almost certainly not the correct maths
             //double frequency_target = frequency_target - (pow(frequency, 1.0/12.0));
             //return frequency - ((frequency - frequency_target) * modulation_normal);
-            double frequency_target = (pow(frequency, 1.0/12.0));
+            //TODO: almost certainly wrong
+            double frequency_target = frequency + (frequency - frequency * (pow(2.0,(modulation_normal*100.0)/1200.0)));
             return (frequency_target - frequency) * modulation_normal;
         }
     }
@@ -221,8 +222,8 @@ class Voice {
         // get the frequency range of a semitone at the current frequency...
         uint16_t effective_freq = curFrequency + get_modulated_frequency(curFrequency, pitch_modulate);
         uint16_t sid_frequency = getSIDFrequencyForFrequency(effective_freq);
-        hw->write(VREG(FREQLO), (uint8_t) (0b0000000011111111 & effective_freq), (char*)"FREQLO");
-        hw->write(VREG(FREQHI), (uint8_t) (0b0000000011111111 & (effective_freq >> 8)), (char*)"FREQHI");
+        hw->write(VREG(FREQLO), (uint8_t) (0b0000000011111111 & sid_frequency), (char*)"FREQLO");
+        hw->write(VREG(FREQHI), (uint8_t) (0b0000000011111111 & (sid_frequency >> 8)), (char*)"FREQHI");
     }
     
     // frequency calculation, either directly from passed-in double (eg from CV) or from a MIDI note

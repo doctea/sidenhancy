@@ -39,7 +39,7 @@ ADSParameterInput<ADS1115,BaseParameter> input_C = ADSParameterInput<ADS1115,Bas
 ADSParameterInput<ADS1115,Parameter<Voice,double>> input_E = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_2_pitch);
 ADSParameterInput<ADS1115,Parameter<Voice,double>> input_F = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_3_pitch);*/
 
-ADSParameterInput<ADS1115,BaseParameter> input_D = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_1_pitch);
+ADSParameterInput<ADS1115,BaseParameter> input_D = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1, &param_overall_pitch_modulation); //, &param_osc_1_pitch);
 ADSParameterInput<ADS1115,BaseParameter> input_E = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_2_pitch);
 ADSParameterInput<ADS1115,BaseParameter> input_F = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_3_pitch);
 
@@ -61,8 +61,12 @@ void setup_parameters() {
     available_parameters.add(&param_osc_2_pitch);
     available_parameters.add(&param_osc_3_pitch);
 
+    //param_overall_pitch.debug = true;
+
     input_C.setInverted();
-    input_F.setInverted();    
+    input_F.setInverted();
+
+    input_D.map_unipolar = true;    
 
     available_inputs.add(&input_A);
     available_inputs.add(&input_B);
