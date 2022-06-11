@@ -59,6 +59,7 @@ Menu *menu;// = Menu(&tft);
 
 #include "sid6581.h"
 
+/*
 void change_filter_cutoff(int last_value, int new_value) {
     Serial.printf(F("change_filter_cutoff from %i to %i\n"), last_value, new_value);
     sid.setCutoff((uint16_t)new_value);
@@ -82,7 +83,7 @@ void setAllPulseWidth(int pw) {
 void change_pulsewidth(int new_value, int old_value) {}
 
 DirectNumberControl pulse_width_control("Pulse width", getAllPulseWidth, setAllPulseWidth, 0, MAX_CUTOFF, change_pulsewidth);
-
+*/
 //NumberControl CV1InputPanel("CV1 input", &ads_values[0], ads_values[0], 0, 4095, nullptr); //null_func);
 //NumberControl CV2InputPanel("CV2 input", &ads_values[1], ads_values[1], 0, 4095, nullptr); //null_func);
 /*MenuItem test_item_1 = MenuItem("test 1");
@@ -117,8 +118,8 @@ void setup_menu() {
     // set menu to only display one control at a time
     menu->mode = Menu::DISPLAY_ONE;
 
-    filter_cutoff_control.setStep(32);
-    pulse_width_control.setStep(256);
+    //filter_cutoff_control.setStep(32);
+    //pulse_width_control.setStep(256);
 
     //CV1InputPanel.setReadOnly(true);
     //CV2InputPanel.setReadOnly(true);
@@ -132,8 +133,8 @@ void setup_menu() {
     menu->add(&test_item_3);
     Serial.println(F("Added test menu items!"));*/
 
-    menu->add(&filter_cutoff_control);
-    menu->add(&pulse_width_control);
+    //menu->add(&filter_cutoff_control);
+    //menu->add(&pulse_width_control);
 
 }
 

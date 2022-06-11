@@ -44,7 +44,7 @@ ADSParameterInput<ADS1115,BaseParameter> input_E = ADSParameterInput<ADS1115,Bas
 ADSParameterInput<ADS1115,BaseParameter> input_F = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_3_pitch);
 
 // menu item for direct control over a Parameter via menu
-ParameterMenuItem PulseWidthModulationPanel("Pulse width mod", &param_overall_pulsewidth_modulation);
+//ParameterMenuItem PulseWidthModulationPanel("Pulse width mod", &param_overall_pulsewidth_modulation);
 
 void setup_parameters() {
     Serial.println(F("==== begin setup_parameters ===="));
@@ -92,7 +92,7 @@ void update_parameters() {
 // initialise the menus for the ParameterInputs
 void setup_parameter_menu() {
     Serial.println("==== setup_parameter_menu starting ====");
-    menu->add(&PulseWidthModulationPanel);
+    //menu->add(&PulseWidthModulationPanel);
     //menu->add(&testitem);
 
     Serial.println("Adding ParameterSelectorControls for available_inputs...");
@@ -112,4 +112,10 @@ void setup_parameter_menu() {
         Serial.println("\tAdded!");
     }
     Serial.println("setup_parameter_menu done ==================");
+
+    for (int i = 0 ; i < available_parameters.size() ; i++) {
+        BaseParameter *p = available_parameters.get(i);
+        ParameterMenuItem *ctrl = new ParameterMenuItem(p->label, p);
+        menu->add(ctrl);
+    }
 }
