@@ -9,6 +9,8 @@
 
 #include "sidspec.h"
 
+#include "ads.h"    // for get_voltage_for_frequency
+
 // get current voice register offset
 #define VREG(X)     (get_base_register_address() + offsetof(voicemap,X))
 #define VREG2(X,Y)  (get_base_register_address() + offsetof(sidmap[X],Y))
@@ -179,10 +181,48 @@ class Voice {
         updatePulseWidth();
     }
 
+    float pitch_modulate = 0.0f;
+    void modulatePitch(float normal) {
+        this->pitch_modulate = normal;
+        updateVoiceFrequency();
+    }
+
+    double get_modulated_frequency(double frequency, double modulation_normal) {
+        if (modulation_normal == 0.0)
+            return frequency;
+
+        if (modulation_normal>0.0) {
+            // get modulation vs the note up from frequency
+            // To get the frequency a semitone up from A4 we multiply 440 Hz by the twelfth root of two
+            // n'th root of x is given by pow(x,1.0/n)
+            /*To do this on a (scientific) calculator, all you need to remember is that there are 1200 cents to an octave. The formula is:
+                a*2^(c/1200) = b.
+
+                For example, using the information from Dave's table, we can convert 19.56 cents to Hz for a 440.
+                Here a = 440, c = 19.56 and b is what we want to know.
+
+                440*2^(19.56/1200) = 444.9994 Hz.*/
+            //double frequency_target = (pow(frequency, 1.0/12.0));
+            double frequency_target = frequency * (pow(2.0,(modulation_normal*100.0)/1200.0));
+            Serial.printf("For frequency %i, found what should be frequency one semitone above, ==%i\n", (uint32_t) frequency, (uint32_t) (frequency_target));
+            return (frequency_target - frequency) * modulation_normal;
+        } else {
+            // get modulation vs the note down from frequency
+            //modulation_normal = 1.0 - (modulation_normal*-1.0);
+            // almost certainly not the correct maths
+            //double frequency_target = frequency_target - (pow(frequency, 1.0/12.0));
+            //return frequency - ((frequency - frequency_target) * modulation_normal);
+            double frequency_target = (pow(frequency, 1.0/12.0));
+            return (frequency_target - frequency) * modulation_normal;
+        }
+    }
+
     void updateVoiceFrequency() {
-        uint16_t sid_frequency = getSIDFrequencyForFrequency(curFrequency);
-        hw->write(VREG(FREQLO), (uint8_t) (0b0000000011111111 & sid_frequency), (char*)"FREQLO");
-        hw->write(VREG(FREQHI), (uint8_t) (0b0000000011111111 & (sid_frequency >> 8)), (char*)"FREQHI");
+        // get the frequency range of a semitone at the current frequency...
+        uint16_t effective_freq = curFrequency + get_modulated_frequency(curFrequency, pitch_modulate);
+        uint16_t sid_frequency = getSIDFrequencyForFrequency(effective_freq);
+        hw->write(VREG(FREQLO), (uint8_t) (0b0000000011111111 & effective_freq), (char*)"FREQLO");
+        hw->write(VREG(FREQHI), (uint8_t) (0b0000000011111111 & (effective_freq >> 8)), (char*)"FREQHI");
     }
     
     // frequency calculation, either directly from passed-in double (eg from CV) or from a MIDI note
@@ -446,6 +486,17 @@ class SID6581 {
         pulsewidth_modulation = normal;
         for (int i = 0 ; i < 3 ; i++) {
             voice[i].modulatePulseWidth(normal);
+        }
+    }
+
+    float pitch_modulation = 0.0f;
+    void modulateAllPitches(double normal) {
+        /*Serial.print("sid#modulateAllPulseWidths(");
+        Serial.print(normal);
+        Serial.println(")");*/
+        pitch_modulation = normal;
+        for (int i = 0 ; i < 3 ; i++) {
+            voice[i].modulatePitch(normal);
         }
     }
 

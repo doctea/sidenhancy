@@ -15,8 +15,10 @@
 LinkedList<BaseParameter*>      available_parameters    = LinkedList<BaseParameter*>();
 
 BaseParameter       param_none                              = BaseParameter("None");
-FrequencyParameter  param_overall_pitch                     = FrequencyParameter<SID6581,double> ("Overall pitch\0", &sid, &SID6581::setAllFrequency);
-Parameter           param_overall_pulsewidth_modulation     = Parameter<SID6581,double> ("Overall PW Mod\0", &sid, &SID6581::modulateAllPulseWidths);
+FrequencyParameter  param_overall_pitch                     = FrequencyParameter<SID6581,double> ("Overall pitch", &sid, &SID6581::setAllFrequency);
+Parameter           param_overall_pulsewidth_modulation     = Parameter<SID6581,double> ("Overall PW Mod", &sid, &SID6581::modulateAllPulseWidths);
+Parameter           param_overall_pitch_modulation          = Parameter<SID6581,double> ("Overall Pitch Mod", &sid, &SID6581::modulateAllPitches);
+
 FrequencyParameter  param_osc_1_pitch                       = FrequencyParameter<Voice,double> ("Osc 1 pitch\0", &sid.voice[0], &Voice::setFrequency);
 FrequencyParameter  param_osc_2_pitch                       = FrequencyParameter<Voice,double> ("Osc 2 pitch\0", &sid.voice[1], &Voice::setFrequency);
 FrequencyParameter  param_osc_3_pitch                       = FrequencyParameter<Voice,double> ("Osc 3 pitch\0", &sid.voice[2], &Voice::setFrequency);
@@ -26,13 +28,20 @@ Parameter           param_filter_cutoff                     = Parameter<SID6581,
 // ParameterInputs, ie wrappers around input mechanism, assignable to a Parameter
 LinkedList<BaseParameterInput*> available_inputs            = LinkedList<BaseParameterInput*>();
 
-ADSParameterInput<ADS1115,Parameter<SID6581,double>>        input_A = ADSParameterInput<ADS1115,Parameter<SID6581,double>>(&ADS_OBJECT, 0, &param_overall_pitch);
-ADSParameterInput<ADS1115,Parameter<SID6581,double>>        input_B = ADSParameterInput<ADS1115,Parameter<SID6581,double>>(&ADS_OBJECT, 0, &param_overall_pulsewidth_modulation);
-ADSParameterInput<ADS1115,Parameter<SID6581,double>>        input_C = ADSParameterInput<ADS1115,Parameter<SID6581,double>>(&ADS_OBJECT, 1, &param_filter_cutoff);
+/*ADSParameterInput<ADS1115,Parameter<SID6581,double>> input_A = ADSParameterInput<ADS1115,Parameter<SID6581,double>>(&ADS_OBJECT, 0, &param_overall_pitch);
+ADSParameterInput<ADS1115,Parameter<SID6581,double>> input_B = ADSParameterInput<ADS1115,Parameter<SID6581,double>>(&ADS_OBJECT, 0); //&param_overall_pulsewidth_modulation);
+ADSParameterInput<ADS1115,Parameter<SID6581,double>> input_C = ADSParameterInput<ADS1115,Parameter<SID6581,double>>(&ADS_OBJECT, 0); //&param_filter_cutoff);*/
+ADSParameterInput<ADS1115,BaseParameter> input_A = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 0, &param_overall_pitch);
+ADSParameterInput<ADS1115,BaseParameter> input_B = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 0); //&param_overall_pulsewidth_modulation);
+ADSParameterInput<ADS1115,BaseParameter> input_C = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 0); //&param_filter_cutoff);
 
-ADSParameterInput<ADS1115,Parameter<Voice,double>>        input_D = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_1_pitch);
-ADSParameterInput<ADS1115,Parameter<Voice,double>>        input_E = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_2_pitch);
-ADSParameterInput<ADS1115,Parameter<Voice,double>>        input_F = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_3_pitch);
+/*ADSParameterInput<ADS1115,Parameter<Voice,double>> input_D = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_1_pitch);
+ADSParameterInput<ADS1115,Parameter<Voice,double>> input_E = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_2_pitch);
+ADSParameterInput<ADS1115,Parameter<Voice,double>> input_F = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_3_pitch);*/
+
+ADSParameterInput<ADS1115,BaseParameter> input_D = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_1_pitch);
+ADSParameterInput<ADS1115,BaseParameter> input_E = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_2_pitch);
+ADSParameterInput<ADS1115,BaseParameter> input_F = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_3_pitch);
 
 // menu item for direct control over a Parameter via menu
 ParameterMenuItem PulseWidthModulationPanel("Pulse width mod", &param_overall_pulsewidth_modulation);
@@ -45,13 +54,14 @@ void setup_parameters() {
     // add the available parameters to a list used globally and later passed to each selector menuitem 
     available_parameters.add(&param_none);
     available_parameters.add(&param_overall_pitch);
+    available_parameters.add(&param_overall_pitch_modulation);
     available_parameters.add(&param_overall_pulsewidth_modulation);
     available_parameters.add(&param_filter_cutoff);
     available_parameters.add(&param_osc_1_pitch);
     available_parameters.add(&param_osc_2_pitch);
     available_parameters.add(&param_osc_3_pitch);
 
-    input_D.setInverted();
+    input_C.setInverted();
     input_F.setInverted();    
 
     available_inputs.add(&input_A);

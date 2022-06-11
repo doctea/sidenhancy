@@ -55,6 +55,8 @@ void setup() {
     
     setup_parameter_menu();
 
+    sid.allGateOn();  // turn on all gates so that we can use this like an oscillator
+
     Serial.println(F("exiting setup()\n\n"));
 }
 

@@ -1,0 +1,64 @@
+diff --git a/include/Config.h b/include/Config.h
+index 44a2e2b..a77c6e2 100644
+--- a/include/Config.h
++++ b/include/Config.h
+@@ -12,4 +12,15 @@
+ //#define ENCODER_KNOB_L      PIN_PC7 //PCINT23 //PIN_PC7     //PCINT23
+ //#define PIN_BUTTON_A        PIN_ENCODER_BUTTON
+ #define PIN_BUTTON_B        PIN_PC7
+-//#define ENCODER_STEP_DIVISOR    4   // needs to be 4 on usb_midi_clocker on teensy, 1 on my sid prototype, not sure why?
+\ No newline at end of file
++//#define ENCODER_STEP_DIVISOR    4   // needs to be 4 on usb_midi_clocker on teensy, 1 on my sid prototype, not sure why?
++
++// TODO: what is the maths behind this?  make configurable, etc 
++// from empirical measuring of received voltage and asked wolfram alpha to figure it out:-
++//  1v: v=1008        = 0.99206349206
++//  2v: v=2031-2034   = 0.98473658296
++//  3v: v=3060        = 0.98039215686
++//  4v: v=4086-4089   = 0.9789525208
++// https://www.wolframalpha.com/input?i=linear+fit+%7B%7B1.008%2C1%7D%2C+%7B2.034%2C2%7D%2C+%7B3.063%2C3%7D%2C+%7B4.086%2C4%7D%2C+%7B5.1%2C5%7D%7D
++#define FREQ_FUDGE_1    0.976937
++#define FREQ_FUDGE_2    0.0123321
++#define VOLTAGE_SCALER  0.97
+\ No newline at end of file
+diff --git a/src/main.cpp b/src/main.cpp
+index d12f354..9f28357 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -110,7 +110,7 @@ void unused_loop() {
+ 
+ void adc_loop() {
+   static int last_pitch;
+-  int pitch = get_midi_pitch_for_voltage(read_voltage(0));
++  int pitch = get_midi_pitch_for_voltage(VOLTAGE_SCALER * read_voltage(0));
+   if (pitch!=last_pitch) {
+     Serial.printf(F("got pitch %i\n"), pitch);
+     sid.playNote(0,pitch);
+diff --git a/src/sid_parameters.cpp b/src/sid_parameters.cpp
+index 32201ee..2ec1068 100644
+--- a/src/sid_parameters.cpp
++++ b/src/sid_parameters.cpp
+@@ -1,5 +1,7 @@
+ #include "sid6581.h"
+ 
++#include "Config.h"
++
+ #include "ads.h"
+ 
+ #include "FrequencyParameter.h"
+@@ -15,11 +17,11 @@
+ LinkedList<BaseParameter*>      available_parameters    = LinkedList<BaseParameter*>();
+ 
+ BaseParameter       param_none                              = BaseParameter("None");
+-FrequencyParameter  param_overall_pitch                     = FrequencyParameter<SID6581,double> ("Overall pitch\0", &sid, &SID6581::setAllFrequency);
++FrequencyParameter  param_overall_pitch                     = FrequencyParameter<SID6581,double> ("Overall pitch\0", &sid, &SID6581::setAllFrequency, FREQ_FUDGE_1, FREQ_FUDGE_2, VOLTAGE_SCALER);
+ Parameter           param_overall_pulsewidth_modulation     = Parameter<SID6581,double> ("Overall PW Mod\0", &sid, &SID6581::modulateAllPulseWidths);
+-FrequencyParameter  param_osc_1_pitch                       = FrequencyParameter<Voice,double> ("Osc 1 pitch\0", &sid.voice[0], &Voice::setFrequency);
+-FrequencyParameter  param_osc_2_pitch                       = FrequencyParameter<Voice,double> ("Osc 2 pitch\0", &sid.voice[1], &Voice::setFrequency);
+-FrequencyParameter  param_osc_3_pitch                       = FrequencyParameter<Voice,double> ("Osc 3 pitch\0", &sid.voice[2], &Voice::setFrequency);
++FrequencyParameter  param_osc_1_pitch                       = FrequencyParameter<Voice,double> ("Osc 1 pitch\0", &sid.voice[0], &Voice::setFrequency, FREQ_FUDGE_1, FREQ_FUDGE_2, VOLTAGE_SCALER);
++FrequencyParameter  param_osc_2_pitch                       = FrequencyParameter<Voice,double> ("Osc 2 pitch\0", &sid.voice[1], &Voice::setFrequency, FREQ_FUDGE_1, FREQ_FUDGE_2, VOLTAGE_SCALER);
++FrequencyParameter  param_osc_3_pitch                       = FrequencyParameter<Voice,double> ("Osc 3 pitch\0", &sid.voice[2], &Voice::setFrequency, FREQ_FUDGE_1, FREQ_FUDGE_2, VOLTAGE_SCALER);
+ Parameter           param_filter_cutoff                     = Parameter<SID6581,double> ("Filter cutoff\0", &sid, &SID6581::setCutoff);
+ 
+ 
