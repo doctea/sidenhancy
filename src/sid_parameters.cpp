@@ -25,39 +25,39 @@ Parameter           param_overall_pitch_modulation          = Parameter<SID6581,
 Parameter           param_filter_cutoff                     = Parameter<SID6581,double> ("Filter cutoff", &sid, &SID6581::setCutoff);
 Parameter           param_filter_resonance                  = Parameter<SID6581,double> ("Filter res", &sid, &SID6581::setResonanceD);
 
-FrequencyParameter  param_osc_1_pitch                       = FrequencyParameter<Voice,double> ("Osc 1 pitch", &sid.voice[0], &Voice::setFrequency);
+/*FrequencyParameter  param_osc_1_pitch                       = FrequencyParameter<Voice,double> ("Osc 1 pitch", &sid.voice[0], &Voice::setFrequency);
 FrequencyParameter  param_osc_2_pitch                       = FrequencyParameter<Voice,double> ("Osc 2 pitch", &sid.voice[1], &Voice::setFrequency);
-FrequencyParameter  param_osc_3_pitch                       = FrequencyParameter<Voice,double> ("Osc 3 pitch", &sid.voice[2], &Voice::setFrequency);
+FrequencyParameter  param_osc_3_pitch                       = FrequencyParameter<Voice,double> ("Osc 3 pitch", &sid.voice[2], &Voice::setFrequency);*/
 
 /*Parameter           param_osc_1_waveforms                   = Parameter<Voice,double> ("Osc 1 wave", &sid.voice[0], &Voice::setOsc);
 Parameter           param_osc_2_waveforms                   = Parameter<Voice,double> ("Osc 2 wave", &sid.voice[1], &Voice::setOsc);
 Parameter           param_osc_3_waveforms                   = Parameter<Voice,double> ("Osc 3 wave", &sid.voice[2], &Voice::setOsc);*/
 
-ToggleParameter           param_osc_1_triangle  = ToggleParameter<Voice,bool>(
-        (char*)"Osc 1 Triangle", 
-        &sid.voice[0], 
-        sid.voice[0].isWaveform(ENVOSC::triMask), 
-        &Voice::triOn, 
-        &Voice::triOff
-    );
+void add_voice_parameters(LinkedList<DataParameter*> *available_parameters, int voice_number) {
+    char label[20] = "            ";
+    Voice *voice = &sid.voice[voice_number];
+    ToggleParameter<Voice,bool> *param;
 
-ToggleParameter           param_osc_1_saw  = ToggleParameter<Voice,bool>(
-        (char*)"Osc 1 Saw", 
-        &sid.voice[0], 
-        sid.voice[0].isWaveform(ENVOSC::sawMask), 
-        &Voice::sawOn, 
-        &Voice::sawOff
-    );
+    sprintf(label, "Osc %i %s", voice_number+1, "Triangle");
+    param = new ToggleParameter<Voice,bool>(label, voice, voice->isWaveform(ENVOSC::triMask), &Voice::triOn, &Voice::triOff);
+    available_parameters->add(param);
 
-ToggleParameter           param_osc_1_pulse  = ToggleParameter<Voice,bool>(
-        (char*)"Osc 1 Pulse", 
-        &sid.voice[0], 
-        sid.voice[0].isWaveform(ENVOSC::pulseMask), 
-        &Voice::pulseOn, 
-        &Voice::pulseOff
-    );
+    sprintf(label, "Osc %i %s", voice_number+1, "Pulse");
+    param = new ToggleParameter<Voice,bool>(label, voice, voice->isWaveform(ENVOSC::pulseMask), &Voice::pulseOn, &Voice::pulseOff);
+    available_parameters->add(param);
 
-//Parameter           paa
+    sprintf(label, "Osc %i %s", voice_number+1, "Saw");    
+    param = new ToggleParameter<Voice,bool>(label, voice, voice->isWaveform(ENVOSC::sawMask), &Voice::sawOn, &Voice::sawOff);
+    available_parameters->add(param);
+
+    sprintf(label, "Osc %i %s", voice_number+1, "Noise");
+    param = new ToggleParameter<Voice,bool>(label, voice, voice->isWaveform(ENVOSC::noiseMask), &Voice::noiseOn, &Voice::noiseOff);    
+    available_parameters->add(param);
+
+    sprintf(label, "Osc %i %s", voice_number+1, "Pitch");
+    FrequencyParameter<Voice,double> *param_freq = new FrequencyParameter<Voice,double> (label, &sid.voice[0], &Voice::setFrequency);
+    available_parameters->add(param_freq);
+}
 
 // ParameterInputs, ie wrappers around input mechanism, assignable to a Parameter
 LinkedList<BaseParameterInput*> available_inputs            = LinkedList<BaseParameterInput*>();
@@ -92,19 +92,23 @@ void setup_parameters() {
     available_parameters.add(&param_overall_pulsewidth_modulation);
     available_parameters.add(&param_filter_cutoff);
     available_parameters.add(&param_filter_resonance);
-    available_parameters.add(&param_osc_1_pitch);
+    /*available_parameters.add(&param_osc_1_pitch);
     available_parameters.add(&param_osc_2_pitch);
-    available_parameters.add(&param_osc_3_pitch);
+    available_parameters.add(&param_osc_3_pitch);*/
 
     /*available_parameters.add(&param_osc_1_waveforms);
     available_parameters.add(&param_osc_2_waveforms);
     available_parameters.add(&param_osc_3_waveforms);*/
 
-    available_parameters.add(&param_osc_1_triangle);
+    /*available_parameters.add(&param_osc_1_triangle);
     available_parameters.add(&param_osc_1_saw);
-    available_parameters.add(&param_osc_1_pulse);
+    available_parameters.add(&param_osc_1_pulse);*/
 
     //param_overall_pitch.debug = true;
+
+    add_voice_parameters(&available_parameters, 0);
+    add_voice_parameters(&available_parameters, 1);
+    add_voice_parameters(&available_parameters, 2);    
 
     input_C.setInverted();
     input_F.setInverted();
