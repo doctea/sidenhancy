@@ -3,27 +3,61 @@
 #include "ads.h"
 
 #include "FrequencyParameter.h"
+#include "ToggleParameter.h"
+
 //#include "ParameterInput.h"
 #include "ADSParameterInput.h"
 
 #include "mymenu.h"
 #include "ParameterMenuItems.h"
+#include "ToggleMenuItems.h"
 
 #include "LinkedList.h"
 
 // Parameters, ie wrappers around destination object
-LinkedList<BaseParameter*>      available_parameters    = LinkedList<BaseParameter*>();
+LinkedList<DataParameter*>      available_parameters    = LinkedList<DataParameter*>();
 
-BaseParameter       param_none                              = BaseParameter("None");
+DataParameter       param_none                              = DataParameter("None");
 FrequencyParameter  param_overall_pitch                     = FrequencyParameter<SID6581,double> ("Overall pitch", &sid, &SID6581::setAllFrequency);
 Parameter           param_overall_pulsewidth_modulation     = Parameter<SID6581,double> ("Overall PW Mod", &sid, &SID6581::modulateAllPulseWidths);
 Parameter           param_overall_pitch_modulation          = Parameter<SID6581,double> ("Overall Pitch Mod", &sid, &SID6581::modulateAllPitches);
 
-FrequencyParameter  param_osc_1_pitch                       = FrequencyParameter<Voice,double> ("Osc 1 pitch\0", &sid.voice[0], &Voice::setFrequency);
-FrequencyParameter  param_osc_2_pitch                       = FrequencyParameter<Voice,double> ("Osc 2 pitch\0", &sid.voice[1], &Voice::setFrequency);
-FrequencyParameter  param_osc_3_pitch                       = FrequencyParameter<Voice,double> ("Osc 3 pitch\0", &sid.voice[2], &Voice::setFrequency);
-Parameter           param_filter_cutoff                     = Parameter<SID6581,double> ("Filter cutoff\0", &sid, &SID6581::setCutoff);
+Parameter           param_filter_cutoff                     = Parameter<SID6581,double> ("Filter cutoff", &sid, &SID6581::setCutoff);
+Parameter           param_filter_resonance                  = Parameter<SID6581,double> ("Filter res", &sid, &SID6581::setResonanceD);
 
+FrequencyParameter  param_osc_1_pitch                       = FrequencyParameter<Voice,double> ("Osc 1 pitch", &sid.voice[0], &Voice::setFrequency);
+FrequencyParameter  param_osc_2_pitch                       = FrequencyParameter<Voice,double> ("Osc 2 pitch", &sid.voice[1], &Voice::setFrequency);
+FrequencyParameter  param_osc_3_pitch                       = FrequencyParameter<Voice,double> ("Osc 3 pitch", &sid.voice[2], &Voice::setFrequency);
+
+/*Parameter           param_osc_1_waveforms                   = Parameter<Voice,double> ("Osc 1 wave", &sid.voice[0], &Voice::setOsc);
+Parameter           param_osc_2_waveforms                   = Parameter<Voice,double> ("Osc 2 wave", &sid.voice[1], &Voice::setOsc);
+Parameter           param_osc_3_waveforms                   = Parameter<Voice,double> ("Osc 3 wave", &sid.voice[2], &Voice::setOsc);*/
+
+ToggleParameter           param_osc_1_triangle  = ToggleParameter<Voice,bool>(
+        (char*)"Osc 1 Triangle", 
+        &sid.voice[0], 
+        sid.voice[0].isWaveform(ENVOSC::triMask), 
+        &Voice::triOn, 
+        &Voice::triOff
+    );
+
+ToggleParameter           param_osc_1_saw  = ToggleParameter<Voice,bool>(
+        (char*)"Osc 1 Saw", 
+        &sid.voice[0], 
+        sid.voice[0].isWaveform(ENVOSC::sawMask), 
+        &Voice::sawOn, 
+        &Voice::sawOff
+    );
+
+ToggleParameter           param_osc_1_pulse  = ToggleParameter<Voice,bool>(
+        (char*)"Osc 1 Pulse", 
+        &sid.voice[0], 
+        sid.voice[0].isWaveform(ENVOSC::pulseMask), 
+        &Voice::pulseOn, 
+        &Voice::pulseOff
+    );
+
+//Parameter           paa
 
 // ParameterInputs, ie wrappers around input mechanism, assignable to a Parameter
 LinkedList<BaseParameterInput*> available_inputs            = LinkedList<BaseParameterInput*>();
@@ -57,9 +91,18 @@ void setup_parameters() {
     available_parameters.add(&param_overall_pitch_modulation);
     available_parameters.add(&param_overall_pulsewidth_modulation);
     available_parameters.add(&param_filter_cutoff);
+    available_parameters.add(&param_filter_resonance);
     available_parameters.add(&param_osc_1_pitch);
     available_parameters.add(&param_osc_2_pitch);
     available_parameters.add(&param_osc_3_pitch);
+
+    /*available_parameters.add(&param_osc_1_waveforms);
+    available_parameters.add(&param_osc_2_waveforms);
+    available_parameters.add(&param_osc_3_waveforms);*/
+
+    available_parameters.add(&param_osc_1_triangle);
+    available_parameters.add(&param_osc_1_saw);
+    available_parameters.add(&param_osc_1_pulse);
 
     //param_overall_pitch.debug = true;
 
@@ -103,7 +146,7 @@ void setup_parameter_menu() {
         Serial.printf("%i: Creating control labelled '%s'...\n", i, input_label);
         ParameterSelectorControl *ctrl = new ParameterSelectorControl(input_label);
 
-        Serial.printf("%i:\tConfiguring it with available_inputs item target '%s'..\n", available_inputs.get(i)->target_parameter->label);
+        Serial.printf("%i:\tConfiguring it with available_inputs item target '%s'..\n", i, available_inputs.get(i)->target_parameter->label);
         BaseParameterInput *param_input = available_inputs.get(i);
         ctrl->configure(param_input, &available_parameters);
 
@@ -111,11 +154,16 @@ void setup_parameter_menu() {
         menu->add(ctrl);
         Serial.println("\tAdded!");
     }
-    Serial.println("setup_parameter_menu done ==================");
 
+    Serial.println("Starting add available_parameters loop..."); Serial.flush();
     for (int i = 0 ; i < available_parameters.size() ; i++) {
-        BaseParameter *p = available_parameters.get(i);
-        ParameterMenuItem *ctrl = new ParameterMenuItem(p->label, p);
+        DataParameter *p = available_parameters.get(i);
+        Serial.printf("\tinstantiating ParameterMenuItem for item %i aka %s\n", i, p->label); Serial.flush();
+        MenuItem *ctrl = p->makeControl();
+        Serial.printf("\tadding it to menu...\n", i, p->label); Serial.flush();
         menu->add(ctrl);
     }
+    Serial.println("Finished adding available_parameters loop"); Serial.flush();
+
+    Serial.println("setup_parameter_menu done ==================");
 }

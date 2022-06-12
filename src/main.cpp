@@ -240,9 +240,9 @@ void loop() {
     }
     if (i=='S') {
       if (sid.resonance==0)
-        sid.setResonance(MAX_RESONANCE);
+        sid.setResonance((byte)MAX_RESONANCE);
       else
-        sid.setResonance(0);
+        sid.setResonance((byte)0);
       return;
     }
     if (i=='F') {
@@ -282,7 +282,7 @@ void loop() {
       return;
     }
     if (i=='Q') {
-      sid.setResonance(15);
+      sid.setResonance((byte)15);
       for (int i = MAX_CUTOFF ; i > 0 ; i--) {
         sid.setCutoff((uint16_t)i);
         //Serial.printf("Cutoff=%i\n",i);

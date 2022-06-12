@@ -153,6 +153,15 @@ class Voice {
         if (immediate) updateControl();
     }
 
+    bool isWaveform(byte mask) {
+        return (mask & control) == mask;
+    }
+
+    void setOsc(double oscMode) {
+        byte o = oscMode*15;
+        setOscMask(o<<4);
+    }
+
     void updateControl() {
         // Set control register & data
         if (debug_sid) Serial.printf(F("Updating control at %i with 0x%02X\n"), VREG(CR), control);
@@ -404,6 +413,10 @@ class SID6581 {
 
     byte resonance = MAX_RESONANCE / 2;
     byte filter_voices;
+
+    void setResonanceD(double resonance) {
+        this->setResonance((byte)(resonance * 15.0));
+    }
 
     // update RESONANCE and filter voice ON/OFF
     void setResonance(byte value, bool immediate = true) {
