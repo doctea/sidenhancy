@@ -168,7 +168,7 @@ class Voice {
         hw->write(VREG(CR), control, (char*)"CR");
     }
 
-    float pulsewidth_modulate = 0.0f;
+    double pulsewidth_modulate = 0.0f;
     void setPulseWidth(uint16_t pw, bool immediate = true) {
         this->pulseWidth = pw & 0b0000111111111111;
         if (immediate) updatePulseWidth(); 
@@ -189,11 +189,17 @@ class Voice {
         //if (debug) Serial.printf("Modulating pulsewidths by %i\n", (uint16_t)(pulsewidth_modulate*(4095/2)));
         updatePulseWidth();
     }
+    double getModulatedPulseWidth() {
+        return this->pulsewidth_modulate;
+    }
 
-    float pitch_modulate = 0.0f;
-    void modulatePitch(float normal) {
+    double pitch_modulate = 0.0f;
+    void modulatePitch(double normal) {
         this->pitch_modulate = normal;
         updateVoiceFrequency();
+    }
+    double getPitchMod() {
+        return this->pitch_modulate;
     }
 
     double get_modulated_frequency(double frequency, double modulation_normal) {
@@ -230,6 +236,9 @@ class Voice {
     double frequency_multiplier = 1.0f;
     void setFrequencyMultiplier(double frequency_multiplier) {
         this->frequency_multiplier = frequency_multiplier;
+    }
+    double getFrequencyMultiplier() {
+        return this->frequency_multiplier;
     }
 
     void updateVoiceFrequency() {
