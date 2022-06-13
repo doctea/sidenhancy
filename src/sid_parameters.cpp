@@ -90,7 +90,7 @@ ADSParameterInput<ADS1115,BaseParameter> input_D = ADSParameterInput<ADS1115,Bas
 ADSParameterInput<ADS1115,Parameter<Voice,double>> input_E = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_2_pitch);
 ADSParameterInput<ADS1115,Parameter<Voice,double>> input_F = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_3_pitch);*/
 
-ADSParameterInput<ADS1115,BaseParameter> input_E = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1, &param_overall_pitch_modulation); //, &param_osc_1_pitch);
+ADSParameterInput<ADS1115,BaseParameter> input_E = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1, &param_overall_pulsewidth_modulation); //, &param_osc_1_pitch);
 ADSParameterInput<ADS1115,BaseParameter> input_F = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_2_pitch);
 ADSParameterInput<ADS1115,BaseParameter> input_G = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_3_pitch);
 ADSParameterInput<ADS1115,BaseParameter> input_H = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_3_pitch);
@@ -167,8 +167,10 @@ void setup_parameter_menu() {
         BaseParameterInput *param_input = available_inputs.get(i);
         BaseParameter *param = param_input->target_parameter;
 
+        param_input->name = i+'A';
+
         char input_label[20];
-        sprintf(input_label, "Input %i => %c", i<4?0:1, i+'A');
+        sprintf(input_label, "Input %i => %c", i<4?0:1, param_input->name); //i+'A');
 
         Serial.printf("%i: Creating control labelled '%s'...\n", i, input_label);
         ParameterSelectorControl *ctrl = new ParameterSelectorControl(input_label);
