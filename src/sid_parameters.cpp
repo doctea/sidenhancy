@@ -55,8 +55,18 @@ void add_voice_parameters(LinkedList<DataParameter*> *available_parameters, int 
     available_parameters->add(param);
 
     sprintf(label, "Osc %i %s", voice_number+1, "Pitch");
-    FrequencyParameter<Voice,double> *param_freq = new FrequencyParameter<Voice,double> (label, &sid.voice[0], &Voice::setFrequency);
+    FrequencyParameter<Voice,double> *param_freq = new FrequencyParameter<Voice,double> (label, voice, &Voice::setFrequency);
     available_parameters->add(param_freq);
+
+    sprintf(label, "Osc %i %s", voice_number+1, "Pitch Mod");
+    DataParameter *param3 = new Parameter<Voice,double> (label, voice, &Voice::modulatePulseWidth);
+    available_parameters->add(param3);
+
+    sprintf(label, "Osc %i %s", voice_number+1, "Freq mult");
+    DataParameter *param2 = new Parameter<Voice,double> (label, voice, &Voice::setFrequencyMultiplier);
+    param2->minimum_value = 0.0;
+    param2->maximum_value = 400; // actuall 4x?
+    available_parameters->add(param2);
 }
 
 // ParameterInputs, ie wrappers around input mechanism, assignable to a Parameter
@@ -68,14 +78,16 @@ ADSParameterInput<ADS1115,Parameter<SID6581,double>> input_C = ADSParameterInput
 ADSParameterInput<ADS1115,BaseParameter> input_A = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 0, &param_overall_pitch);
 ADSParameterInput<ADS1115,BaseParameter> input_B = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 0); //&param_overall_pulsewidth_modulation);
 ADSParameterInput<ADS1115,BaseParameter> input_C = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 0); //&param_filter_cutoff);
+ADSParameterInput<ADS1115,BaseParameter> input_D = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 0); //&param_filter_cutoff);
 
 /*ADSParameterInput<ADS1115,Parameter<Voice,double>> input_D = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_1_pitch);
 ADSParameterInput<ADS1115,Parameter<Voice,double>> input_E = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_2_pitch);
 ADSParameterInput<ADS1115,Parameter<Voice,double>> input_F = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_3_pitch);*/
 
-ADSParameterInput<ADS1115,BaseParameter> input_D = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1, &param_overall_pitch_modulation); //, &param_osc_1_pitch);
-ADSParameterInput<ADS1115,BaseParameter> input_E = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_2_pitch);
-ADSParameterInput<ADS1115,BaseParameter> input_F = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_3_pitch);
+ADSParameterInput<ADS1115,BaseParameter> input_E = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1, &param_overall_pitch_modulation); //, &param_osc_1_pitch);
+ADSParameterInput<ADS1115,BaseParameter> input_F = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_2_pitch);
+ADSParameterInput<ADS1115,BaseParameter> input_G = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_3_pitch);
+ADSParameterInput<ADS1115,BaseParameter> input_H = ADSParameterInput<ADS1115,BaseParameter>(&ADS_OBJECT, 1); //, &param_osc_3_pitch);
 
 // menu item for direct control over a Parameter via menu
 //ParameterMenuItem PulseWidthModulationPanel("Pulse width mod", &param_overall_pulsewidth_modulation);
@@ -110,8 +122,8 @@ void setup_parameters() {
     add_voice_parameters(&available_parameters, 1);
     add_voice_parameters(&available_parameters, 2);    
 
-    input_C.setInverted();
-    input_F.setInverted();
+    input_D.setInverted();
+    input_H.setInverted();
 
     input_D.map_unipolar = true;    
 
@@ -121,6 +133,8 @@ void setup_parameters() {
     available_inputs.add(&input_D);
     available_inputs.add(&input_E);
     available_inputs.add(&input_F);
+    available_inputs.add(&input_G);        
+    available_inputs.add(&input_H);
 
     Serial.println("==== end setup_parameters ====");
 }
@@ -144,14 +158,17 @@ void setup_parameter_menu() {
 
     Serial.println("Adding ParameterSelectorControls for available_inputs...");
     for (int i = 0 ; i < available_inputs.size() ; i++) {
+        BaseParameterInput *param_input = available_inputs.get(i);
+        BaseParameter *param = param_input->target_parameter;
+
         char input_label[20];
-        sprintf(input_label, "Input %c=>", i+'A');
+        sprintf(input_label, "Input %i => %c", i<4?0:1, i+'A');
 
         Serial.printf("%i: Creating control labelled '%s'...\n", i, input_label);
         ParameterSelectorControl *ctrl = new ParameterSelectorControl(input_label);
 
-        Serial.printf("%i:\tConfiguring it with available_inputs item target '%s'..\n", i, available_inputs.get(i)->target_parameter->label);
-        BaseParameterInput *param_input = available_inputs.get(i);
+        Serial.printf("%i:\tConfiguring it with available_inputs item target '%s'..\n", i, param->label);
+        //BaseParameterInput *param_input = available_inputs.get(i);
         ctrl->configure(param_input, &available_parameters);
 
         Serial.println("\tConfigured!  Adding to menu..");

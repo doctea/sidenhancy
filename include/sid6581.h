@@ -184,7 +184,7 @@ class Voice {
         hw->write(VREG(PWHI), (uint8_t) ((pw & 0b0000111111111111) >> 8), (char*)"PWHI");
         hw->write(VREG(PWLO), (uint8_t) (pw & 0b0000000011111111), (char*)"PWLO");
     }
-    void modulatePulseWidth(float normal) {
+    void modulatePulseWidth(double normal) {
         pulsewidth_modulate = normal;
         //if (debug) Serial.printf("Modulating pulsewidths by %i\n", (uint16_t)(pulsewidth_modulate*(4095/2)));
         updatePulseWidth();
@@ -227,9 +227,15 @@ class Voice {
         }
     }
 
+    double frequency_multiplier = 1.0f;
+    void setFrequencyMultiplier(double frequency_multiplier) {
+        this->frequency_multiplier = frequency_multiplier;
+    }
+
     void updateVoiceFrequency() {
         // get the frequency range of a semitone at the current frequency...
-        uint16_t effective_freq = curFrequency + get_modulated_frequency(curFrequency, pitch_modulate);
+        uint16_t effective_freq = (this->frequency_multiplier*curFrequency) + get_modulated_frequency(curFrequency, pitch_modulate);
+
         uint16_t sid_frequency = getSIDFrequencyForFrequency(effective_freq);
         hw->write(VREG(FREQLO), (uint8_t) (0b0000000011111111 & sid_frequency), (char*)"FREQLO");
         hw->write(VREG(FREQHI), (uint8_t) (0b0000000011111111 & (sid_frequency >> 8)), (char*)"FREQHI");
