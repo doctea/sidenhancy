@@ -3,8 +3,10 @@
 #define PIN_LED     PIN_PD4
 
 #define ENABLE_SCREEN
+#define OLED_ADDR -1
 #define TFT_SSOLED
 
+#define STORAGE
 
 //#define ENCODER_USE_INTERRUPTS
 #define PIN_ENCODER_BUTTON  PIN_PC5
