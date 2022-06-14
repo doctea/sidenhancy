@@ -62,6 +62,7 @@ void setup() {
 
     #ifdef STORAGE
       setup_storage();
+    #endif
 
     save_parameter_settings(&available_parameters, &available_inputs, 0);
     load_parameter_settings(&available_parameters, &available_inputs, 0);
