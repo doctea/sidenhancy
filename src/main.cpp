@@ -6,12 +6,13 @@
 
 #include "sid_parameters.h"
 
-#include "i2cencoder.h"
-
-#include "storage.h"
+#ifdef STORAGE
+  #include "storage.h"
+#endif
 
 //#include "display_ss.h"
 #ifdef ENABLE_SCREEN
+  #include "i2cencoder.h"
   //#include "io.h"
   #include "mymenu.h"
   //#include "menu_io.h"
@@ -50,16 +51,20 @@ void setup() {
       Serial.println(F("\tFinished initialising display!"));
       //tft_print("hello", 0, 0);
     #endif
-
+    
     Serial.println(F("Setting up parameters.."));
     setup_parameters();
     Serial.println(F("Parameter setup done!"));
     
-    setup_parameter_menu();
+    #ifdef ENABLE_SCREEN
+      setup_parameter_menu();
+    #endif
 
-    setup_storage();
+    #ifdef STORAGE
+      setup_storage();
 
-    save_parameter_settings(&available_parameters, &available_inputs, 0);
+      save_parameter_settings(&available_parameters, &available_inputs, 0);
+    #endif
 
     sid.allGateOn();  // turn on all gates so that we can use this like an oscillator
 
@@ -216,18 +221,22 @@ void loop() {
   if (debug) {  Serial.println(F("Start loop()!")); Serial.flush(); }
 
   if (debug) { Serial.println(F("updating inputs()..")); Serial.flush(); }
-  menu->update_inputs();
-  update_encoder();
+  #ifdef ENABLE_SCREEN
+    menu->update_inputs();
+    update_encoder();
+  #endif
 
   update_parameters();
 
-  static unsigned long last_drawn = millis();
-  if (millis() - last_drawn > 50) {
-    if (debug) { Serial.println(F("updating display()!")); Serial.flush(); }
-    menu->display();
-    if (debug) { Serial.println(F("done display()!")); Serial.flush(); }
-    last_drawn = millis();
-  }
+  #ifdef ENABLE_SCREEN
+    static unsigned long last_drawn = millis();
+    if (millis() - last_drawn > 50) {
+      if (debug) { Serial.println(F("updating display()!")); Serial.flush(); }
+      menu->display();
+      if (debug) { Serial.println(F("done display()!")); Serial.flush(); }
+      last_drawn = millis();
+    }
+  #endif
 
   while(Serial.available()) {
     char i = Serial.read();
@@ -352,7 +361,9 @@ void loop() {
     if (i=='3') sid.voice[2].gateOff();
     if (i=='4') sid.voice[2].gateOn();
 
-    if (i=='0') setup_encoder();
+    #ifdef ENABLE_SCREEN
+      if (i=='0') setup_encoder();
+    #endif
 
     if (i=='R') {
       Serial.println(F("Resetting.."));
