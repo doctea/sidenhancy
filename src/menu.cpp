@@ -90,6 +90,14 @@ DirectNumberControl pulse_width_control("Pulse width", getAllPulseWidth, setAllP
 MenuItem test_item_2 = MenuItem("test 2");
 MenuItem test_item_3 = MenuItem("test 3");*/
 
+/*#include "storage.h"
+
+void save_current_settings() {
+    save_parameter_settings(&available_parameters, &available_inputs, 0);
+}
+
+ActionItem save_settings = ActionItem("Save settings", &save_current_settings);*/
+
 void setup_menu() {
     setup_encoder();
 

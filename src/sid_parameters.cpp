@@ -185,6 +185,7 @@ void setup_parameter_menu() {
     }
 
     Serial.println("Starting add available_parameters loop..."); Serial.flush();
+    Serial.printf("Got %i parameters..\n", available_parameters.size());
     for (int i = 0 ; i < available_parameters.size() ; i++) {
         DataParameter *p = available_parameters.get(i);
         Serial.printf("\tinstantiating ParameterMenuItem for item %i aka %s\n", i, p->label); Serial.flush();
