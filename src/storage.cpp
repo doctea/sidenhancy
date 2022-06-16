@@ -4,6 +4,8 @@
 #include "Parameter.h"
 #include "ParameterInput.h"
 
+#define DEBUG_SAVING false
+
 Adafruit_EEPROM_I2C i2ceeprom;
 
 int find_parameter_index_for_label(LinkedList<BaseParameter*> *parameters, char *label) {
@@ -31,7 +33,7 @@ bool load_parameter_settings(LinkedList<BaseParameter*> *parameters, LinkedList<
     byte magic_input[8] = MAGIC_INPUT;
 
     SaveSlotHeader header;
-    int memory_offset = SLOT_SIZE * memory_slot;
+    unsigned int memory_offset = SLOT_SIZE * memory_slot;
     
     i2ceeprom.read(memory_offset, (uint8_t*)&header, sizeof(header));
     for (int i = 0 ; i < sizeof(header.magic) ; i++) {
@@ -42,7 +44,7 @@ bool load_parameter_settings(LinkedList<BaseParameter*> *parameters, LinkedList<
             return false;
         }
     }
-    Serial.printf("Found slot magic header for slot %i at address %i!\n", memory_slot, memory_offset);
+    Serial.printf("\nLOADING======>\n Found slot magic header for slot %i at address %i!\n", memory_slot, memory_offset);
 
     memory_offset += sizeof(header);
 
@@ -72,28 +74,37 @@ bool load_parameter_settings(LinkedList<BaseParameter*> *parameters, LinkedList<
     }
     Serial.println("");
 
-
+    Serial.printf("About to start reading inputs at address %i\n", memory_offset);
     // read up to size of inputs values
     int num_inputs_to_read = min(header.num_inputs, inputs->size());
     if (header.num_inputs!=inputs->size())       Serial.printf("WARNING: found %i inputs to load, but current available_parameters is only %i big - only loading first %i!\n", header.num_inputs, inputs->size(), num_inputs_to_read);
     InputParameterSetting   read_inputs[num_inputs_to_read];
-    for (int i = 0 ; i < parameters->size() ; i++) {
-        i2ceeprom.read(memory_offset, (uint8_t*)&read_inputs[i], sizeof(ParameterSetting));
+    for (int i = 0 ; i < inputs->size() ; i++) {
+        i2ceeprom.read(memory_offset, (uint8_t*)&read_inputs[i], sizeof(InputParameterSetting));
+        bool matchfail = false;
         for (int m = 0 ; m < sizeof(read_inputs[i].magic) ; m++) {
+            /*Serial.printf("Reading input %i from address %02x: (expected %02x, got %02x at %i+%i)\n",
+                                i, memory_offset, magic_input[m], read_inputs[i].magic[m], memory_offset, m
+            );*/
+
             if (read_inputs[i].magic[m] != magic_input[m]) {
-                Serial.printf("ERROR reading input %i from address %02x: Magic header not found! (expected %02x, got %02x at %i)\n",
-                                    i, memory_offset, magic_input[m], read_inputs[i].magic[m], m
+                Serial.printf("ERROR reading input %i from address %02x: Magic header not found! (expected %02x, got %02x at %i+%i)\n",
+                    i, memory_offset, magic_input[m], read_inputs[i].magic[m], memory_offset, m
                 );
+                matchfail = true;
+            }
+            if (matchfail) {
+                Serial.println("Failed to mwatch!");
                 return false;
             }
         }
-        memory_offset += sizeof(ParameterSetting);
+        memory_offset += sizeof(InputParameterSetting);
     }
 
     // skip any remaining inputs mentioned in the save header that dont exist in the current parameter list
     for (int i = num_inputs_to_read ; i < header.num_inputs ; i++) {
         Serial.println("Skipping an input.. ");
-        memory_offset += sizeof(ParameterSetting);
+        memory_offset += sizeof(InputParameterSetting);
     }
     Serial.println("");
 
@@ -135,8 +146,12 @@ bool load_parameter_settings(LinkedList<BaseParameter*> *parameters, LinkedList<
     return true;
 }
 
-void save_parameter_settings(LinkedList<BaseParameter*> *parameters, LinkedList<BaseParameterInput*> *inputs, int memory_offset = 0) {
-    byte buffer[sizeof(SaveSlotHeader) + (parameters->size() * sizeof(ParameterSetting)) + (inputs->size() * sizeof(InputParameterSetting))];
+void save_parameter_settings(LinkedList<BaseParameter*> *parameters, LinkedList<BaseParameterInput*> *inputs, int memory_slot = 0) {
+    //byte buffer[sizeof(SaveSlotHeader) + (parameters->size() * sizeof(ParameterSetting)) + (inputs->size() * sizeof(InputParameterSetting))];
+
+    Serial.printf("\nSAVING to %i ===========>\n", memory_slot);
+
+    unsigned int memory_offset = memory_slot * SLOT_SIZE;
 
     SaveSlotHeader header;
     header.num_params = (uint16_t)parameters->size();
@@ -148,9 +163,9 @@ void save_parameter_settings(LinkedList<BaseParameter*> *parameters, LinkedList<
         DataParameter *p = (DataParameter*)parameters->get(i);
         param_settings[i].value = p->getCurrentValue();
         strcpy(param_settings[i].label, p->label);
-        Serial.printf("Saving Parameter %i: '%s'\n", i, param_settings[i].label); //, param_settings[i].parameter_label);
+        if (DEBUG_SAVING) Serial.printf("Saving Parameter %i: '%s'\n", i, param_settings[i].label); //, param_settings[i].parameter_label);
     }
-    Serial.println("---------");
+    if (DEBUG_SAVING) Serial.println("---------");
 
     InputParameterSetting   input_settings[header.num_inputs];
     //memset(&input_settings, 0, sizeof(input_settings));
@@ -162,30 +177,36 @@ void save_parameter_settings(LinkedList<BaseParameter*> *parameters, LinkedList<
             strcpy(input_settings[i].parameter_label, inp->target_parameter->label);
         else   
             strcpy(input_settings[i].parameter_label, "None");
-        Serial.printf("Saving ParameterInput %i: %c linked to parameter with label '%s'\n", i, input_settings[i].name, input_settings[i].parameter_label);
+        if (DEBUG_SAVING) Serial.printf("Saving ParameterInput %i: %c linked to parameter with label '%s'\n", i, input_settings[i].name, input_settings[i].parameter_label);
         input_settings[i].inverted = inp->inverted;
         input_settings[i].map_unipolar = inp->map_unipolar;
     }
-    Serial.println("---------");
+    if (DEBUG_SAVING) Serial.println("---------");
 
     memory_offset *= SLOT_SIZE;    // start 16
     int total_size = sizeof(header)+sizeof(param_settings)+sizeof(input_settings);
-    Serial.printf("Got header of size %i, param_settings of size %i, input_settings of size %i - total is %i to be written starting at %i!\n",
+    if (DEBUG_SAVING) Serial.printf("Got header of size %i, param_settings of size %i, input_settings of size %i - total is %i to be written starting at %i!\n",
                         sizeof(header), sizeof(param_settings), sizeof(input_settings), total_size, memory_offset
     );
 
     int position = memory_offset;
-    Serial.printf("Writing header to %i: ", position);
-    for (int i = 0 ; i < sizeof(header) ; i++) {
-        Serial.printf("0x%02x", &header+i);
+    if (DEBUG_SAVING) {
+        Serial.printf("Writing header to %i: ", position);
+        for (int i = 0 ; i < sizeof(header) ; i++) {
+            Serial.printf("0x%02x", &header+i);
+        }
+        Serial.println("---");
     }
-    Serial.println("---");
     i2ceeprom.write(position, (uint8_t*)&header, sizeof(header));
     i2ceeprom.write(position+sizeof(header), (uint8_t*)&param_settings, sizeof(param_settings));
     i2ceeprom.write(position+sizeof(header)+sizeof(param_settings), (uint8_t*)&input_settings, sizeof(input_settings));
     
-    Serial.printf("Finished writing at top address %i\n", position);
+    if (DEBUG_SAVING) Serial.printf("Finished writing at top address %i\n", position);
 
+    Serial.printf("DONE!");
+}
+
+void dump_fram(unsigned int memory_offset, unsigned int total_size) {
     // test reading back
     Serial.printf("Reading back, starting at %i...\n", memory_offset);
     char row[9];
@@ -206,11 +227,10 @@ void save_parameter_settings(LinkedList<BaseParameter*> *parameters, LinkedList<
         Serial.printf("%02x ", v, i2ceeprom.read(i));
         if (count>0 && count%8==0) { 
             row[8] = '\0'; 
-            Serial.printf("%s\n", row); 
+            Serial.printf("%s @ %i\n", row, i - 7); 
         }
     }
-
-    Serial.printf("DONE!");
+    Serial.println("----");    
 }
 
 void setup_storage() {

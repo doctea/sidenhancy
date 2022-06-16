@@ -64,8 +64,8 @@ void setup() {
       setup_storage();
     #endif
 
-    save_parameter_settings(&available_parameters, &available_inputs, 0);
-    load_parameter_settings(&available_parameters, &available_inputs, 0);
+    //save_parameter_settings(&available_parameters, &available_inputs, DEFAULT_SLOT);
+    load_parameter_settings(&available_parameters, &available_inputs, 0); // restore previous settings
 
     sid.allGateOn();  // turn on all gates so that we can use this like an oscillator
 

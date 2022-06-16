@@ -90,13 +90,16 @@ DirectNumberControl pulse_width_control("Pulse width", getAllPulseWidth, setAllP
 MenuItem test_item_2 = MenuItem("test 2");
 MenuItem test_item_3 = MenuItem("test 3");*/
 
-/*#include "storage.h"
+#include "storage.h"
 
 void save_current_settings() {
     save_parameter_settings(&available_parameters, &available_inputs, 0);
 }
+void load_default_settings() {
+    load_parameter_settings(&available_parameters, &available_inputs, DEFAULT_SLOT);
+}
 
-ActionItem save_settings = ActionItem("Save settings", &save_current_settings);*/
+ActionItem save_settings = ActionItem("Save settings", &save_current_settings);
 
 void setup_menu() {
     setup_encoder();
@@ -125,6 +128,8 @@ void setup_menu() {
 
     // set menu to only display one control at a time
     menu->mode = Menu::DISPLAY_ONE;
+
+    menu->add(&save_settings);
 
     //filter_cutoff_control.setStep(32);
     //pulse_width_control.setStep(256);
