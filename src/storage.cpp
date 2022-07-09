@@ -4,6 +4,8 @@
 #include "Parameter.h"
 #include "ParameterInput.h"
 
+#include "Config.h"
+
 #define DEBUG_SAVING false
 
 Adafruit_EEPROM_I2C i2ceeprom;
@@ -137,8 +139,10 @@ bool load_parameter_settings(LinkedList<BaseParameter*> *parameters, LinkedList<
         BaseParameterInput *input = inputs->get(index_input);
         BaseParameter *param = parameters->get(index_param);
         input->setTarget(param);
-        input->map_unipolar = read_inputs[i].map_unipolar;
-        input->inverted = read_inputs[i].inverted;
+        #ifdef RESTORE_PARAMETER_INPUT_PROPERTIES
+            input->map_unipolar = read_inputs[i].map_unipolar;
+            input->inverted = read_inputs[i].inverted;
+        #endif
         Serial.println("\tRestored settings and linkages!");
     }
 

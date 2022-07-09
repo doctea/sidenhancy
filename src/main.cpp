@@ -421,13 +421,4 @@ void loop() {
   }
 
   if (paused) return;
-
-  /*if (mode==0) 
-    adc_direct_freq_loop();*/
-  /*else if (mode==1)
-    adc_loop();*/
-  if (mode==2)
-    note_loop();
-  else 
-    Serial.printf(F("unknown mode %i?\n"), mode);
 }
