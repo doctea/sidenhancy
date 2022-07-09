@@ -20,6 +20,7 @@ int find_parameter_index_for_label(LinkedList<BaseParameter*> *parameters, char 
 int find_input_index_for_label(LinkedList<BaseParameterInput*> *inputs, char name) {
     int size = inputs->size();
     for (int i = 0 ; i < size ; i++) {
+        Serial.printf("\tfind_input_index_for_label(%c) looping over %c\n", inputs->get(i)->name);
         if (inputs->get(i)->name == name)
             return i;
     }

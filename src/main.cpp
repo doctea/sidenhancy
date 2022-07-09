@@ -10,6 +10,8 @@
   #include "storage.h"
 #endif
 
+#include "ads.h"
+
 //#include "display_ss.h"
 #ifdef ENABLE_SCREEN
   #include "i2cencoder.h"
@@ -55,10 +57,6 @@ void setup() {
     Serial.println(F("Setting up parameters.."));
     setup_parameters();
     Serial.println(F("Parameter setup done!"));
-    
-    #ifdef ENABLE_SCREEN
-      setup_parameter_menu();
-    #endif
 
     #ifdef STORAGE
       setup_storage();
@@ -66,6 +64,10 @@ void setup() {
 
     //save_parameter_settings(&available_parameters, &available_inputs, DEFAULT_SLOT);
     load_parameter_settings(&available_parameters, &available_inputs, 0); // restore previous settings
+
+    #ifdef ENABLE_SCREEN
+      setup_parameter_menu();
+    #endif
 
     sid.allGateOn();  // turn on all gates so that we can use this like an oscillator
 
@@ -238,6 +240,8 @@ void loop() {
       last_drawn = millis();
     }
   #endif
+
+  read_adc_voltages();
 
   while(Serial.available()) {
     char i = Serial.read();

@@ -82,6 +82,9 @@ class Voice {
     }
 
     // oscillator options
+    void toggleSync(bool state) {
+        if (state) syncOn(); else syncOff();
+    }
     void syncOn(bool immediate = true) {
         control |= ENVOSC::syncMask;
         if (immediate) updateControl();
@@ -91,6 +94,9 @@ class Voice {
         if (immediate) updateControl();
     }
 
+    void toggleRing(bool state) {
+        if (state) ringOn(); else ringOff();
+    }
     void ringOn(bool immediate = true) {
         control |= ENVOSC::ringMask;
         if (immediate) updateControl();
@@ -107,6 +113,19 @@ class Voice {
     void testOff(bool immediate = true) {
         control &= ~ENVOSC::testMask;
         if (immediate) updateControl();
+    }
+
+    void toggleTri(bool state) {
+        if (state) triOn();     else triOff();
+    }
+    void toggleSaw(bool state) {
+        if (state) sawOn();     else sawOff();
+    }
+    void togglePulse(bool state) {
+        if (state) pulseOn();   else pulseOff();
+    }
+    void toggleNoise(bool state) {
+        if (state) noiseOn();   else noiseOff();
     }
 
     void triOn(bool immediate = true) {
@@ -420,10 +439,32 @@ class SID6581 {
         unsetFilterVoice(0,false);
         unsetFilterVoice(1,false);
         unsetFilterVoice(2,false);
-        unsetFilterVoice(3);
+        //unsetFilterVoice(3);
 
         updateAll();
         Serial.println(F("------end resetChip------"));
+    }
+
+    bool isFilterVoice0On() { return filter_voices & 1; }
+    bool isFilterVoice1On() { return filter_voices & 2; }
+    bool isFilterVoice2On() { return filter_voices & 4; }
+    void changeFilterVoice0 (bool on) {
+        if (on)
+            setFilterVoice(0);
+        else 
+            unsetFilterVoice(0);
+    }
+    void changeFilterVoice1 (bool on) {
+        if (on)
+            setFilterVoice(1);
+        else 
+            unsetFilterVoice(1);
+    }
+    void changeFilterVoice2 (bool on) {
+        if (on)
+            setFilterVoice(2);
+        else 
+            unsetFilterVoice(2);
     }
 
     byte resonance = MAX_RESONANCE / 2;
@@ -435,7 +476,7 @@ class SID6581 {
 
     // update RESONANCE and filter voice ON/OFF
     void setResonance(byte value, bool immediate = true) {
-        resonance = 0b00001111 & value;
+        resonance = 0b00001111 & value; // turn into a 4-bit value
         if (immediate) updateFilterVoice();
     }
     void setFilterVoice(byte number, bool immediate = true) {
@@ -444,23 +485,51 @@ class SID6581 {
         if (immediate) updateFilterVoice();
     }
     void unsetFilterVoice(byte number, bool immediate = true) {
+        Serial.printf(F("unsetFilterVoice(%i) \n"), number);
+        Serial.printf(F("unsetFilterVoice(%i) current filter_voices is \t=[" BYTE_TO_BINARY_PATTERN "] \n"), number, BYTE_TO_BINARY(filter_voices));
         filter_voices &= ~(1 << number);
-        Serial.printf(F("unsetFilterVoice(%i)\n"), number);
+        Serial.printf(F("unsetFilterVoice(%i) changed to \t=[" BYTE_TO_BINARY_PATTERN "] \n"), number, BYTE_TO_BINARY(filter_voices));
         if (immediate) updateFilterVoice();
     }
     void updateFilterVoice() {
-        hw.write(CREG(RESFILT), ((resonance<<4) | filter_voices), (char*)"RESFILT");
+        byte value = (resonance<<4) | filter_voices;
+        Serial.printf(F("updateFilterVoice setting RES and FILTER VOICE \t=[" BYTE_TO_BINARY_PATTERN "]\n"), BYTE_TO_BINARY(value));
+
+        hw.write(CREG(RESFILT), value, (char*)"RESFILT");
     }
 
     // update filter TYPE mask and VOLUME
     byte filter_type_mask;
     byte volume = MAX_VOLUME;
+    bool isFilterType(byte mask) {
+        return filter_type_mask & mask;
+    }
+    bool isFilterTypeLP() {
+        return isFilterType(filter_lowpass);
+    }
+    bool isFilterTypeBP() {
+        return isFilterType(filter_bandpass);
+    }
+    bool isFilterTypeHP() {
+        return isFilterType(filter_highpass);
+    }
+    bool isFilterTypeOff3() {
+        return isFilterType(filter_off3);
+    }
+    void setFilterTypeLP(bool on)  { if (on) setFilterType(filter_lowpass); else unsetFilterType(filter_lowpass); }
+    void setFilterTypeBP(bool on)  { if (on) setFilterType(filter_bandpass); else unsetFilterType(filter_bandpass);  }
+    void setFilterTypeHP(bool on)  { if (on) setFilterType(filter_highpass); else unsetFilterType(filter_highpass);  }
+    void setFilterTypeOff3(bool on){ if (on) setFilterType(filter_off3); else unsetFilterType(filter_off3);  }
+
     void setFilterType(byte mask, bool immediate = true) {
         filter_type_mask |= mask;
         if (immediate) updateFilterType();
     }
     void unsetFilterType(byte mask, bool immediate = true) {
+        Serial.printf(F("unsetFilterType passed mask\t=[" BYTE_TO_BINARY_PATTERN "]\n"), BYTE_TO_BINARY(mask));
+        Serial.printf(F("unsetFilterType existing \t=[" BYTE_TO_BINARY_PATTERN "]\n"), BYTE_TO_BINARY(filter_type_mask));
         filter_type_mask &= ~mask;
+        Serial.printf(F("unsetFilterType changed to\t=[" BYTE_TO_BINARY_PATTERN "]\n"), BYTE_TO_BINARY(filter_type_mask));
         if (immediate) updateFilterType();
     }
     void setVolume(byte volume, bool immediate = true) {
@@ -582,7 +651,7 @@ class SID6581 {
         unsetFilterVoice(0,false);
         unsetFilterVoice(1,false);
         unsetFilterVoice(2,false);
-        unsetFilterVoice(3,false);
+        //unsetFilterVoice(3,false);
         setVolume(MAX_VOLUME);
         //hw.write(CREG(MODEVOL),0x0F, "SETUP MODEVOL");
         voice[0].setADSR(1,8,15,10,false);
@@ -651,11 +720,11 @@ class SID6581 {
         #define FREQLO 0
         #define FREQHI 1
         #define CR 4
-        hw.write(0+voice3_base,i,"tone:voice3_base");
-        hw.write(FREQHI+voice3_base,i>>8,"tone:voice3_freqhi");
-        hw.write(CR+voice3_base,17,"tone:cr");
+        hw.write(0+voice3_base,i,           "tone:voice3_base");
+        hw.write(FREQHI+voice3_base,i>>8,   "tone:voice3_freqhi");
+        hw.write(CR+voice3_base,17,         "tone:cr");
         delay(200);
-        hw.write(CR+voice3_base,16,"tone:cr");
+        hw.write(CR+voice3_base,16,         "tone:cr");
 
         /*voice[3].setFrequency(i);
         voice[3].triOn();
