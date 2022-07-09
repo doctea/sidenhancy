@@ -17,6 +17,9 @@ void setup_parameter_menu();
     BaseParameter *parameter;
 };*/
 
+void setup_voltage_sources();
+void update_voltage_sources();
+
 extern LinkedList<BaseParameterInput*> available_inputs;
 extern LinkedList<BaseParameter*> available_parameters;
 

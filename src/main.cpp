@@ -44,7 +44,8 @@ void setup() {
     sid.voice[2].sawOn();*/
     Serial.println(F("\tsid initialised!"));
 
-    setup_ads();
+    //setup_ads();
+    setup_voltage_sources();
 
     #ifdef ENABLE_SCREEN
       Serial.println(F("\tSetting up display.."));
@@ -124,7 +125,7 @@ void unused_loop() {
 
 }
 
-void adc_loop() {
+/*void adc_loop() {
   static int last_pitch;
   int pitch = get_midi_pitch_for_voltage(read_voltage(0));
   if (pitch!=last_pitch) {
@@ -134,8 +135,8 @@ void adc_loop() {
     sid.playNote(2,pitch);
   }
   last_pitch = pitch;
-}
-
+}*/
+/*
 void adc_direct_freq_loop() {
   //sid.allGateOn();
 
@@ -164,7 +165,7 @@ void adc_direct_freq_loop() {
     sid.modulateAllPulseWidths(pulseWidth);
     last_pw = pulseWidth;
   }
-}
+}*/
 
 void note_loop() {
     //sid.test_tones();
@@ -234,14 +235,14 @@ void loop() {
   #ifdef ENABLE_SCREEN
     static unsigned long last_drawn = millis();
     if (millis() - last_drawn > 50) {
-      if (debug) { Serial.println(F("updating display()!")); Serial.flush(); }
+      if (debug) { Serial.println(F("updating display()!"));  Serial.flush(); }
       menu->display();
-      if (debug) { Serial.println(F("done display()!")); Serial.flush(); }
+      if (debug) { Serial.println(F("done display()!"));      Serial.flush(); }
       last_drawn = millis();
     }
   #endif
 
-  read_adc_voltages();
+  update_voltage_sources();
 
   while(Serial.available()) {
     char i = Serial.read();
@@ -421,11 +422,11 @@ void loop() {
 
   if (paused) return;
 
-  if (mode==0) 
-    adc_direct_freq_loop();
-  else if (mode==1)
-    adc_loop();
-  else if (mode==2)
+  /*if (mode==0) 
+    adc_direct_freq_loop();*/
+  /*else if (mode==1)
+    adc_loop();*/
+  if (mode==2)
     note_loop();
   else 
     Serial.printf(F("unknown mode %i?\n"), mode);

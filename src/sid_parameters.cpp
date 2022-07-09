@@ -2,11 +2,14 @@
 
 #include "ads.h"
 
+#include "VoltageSource.h"
+#include "ADSVoltageSource.h"
+
 #include "FrequencyParameter.h"
 #include "ToggleParameter.h"
 
 //#include "ParameterInput.h"
-#include "ADSParameterInput.h"
+#include "VoltageParameterInput.h"
 
 #include "mymenu.h"
 #include "ParameterMenuItems.h"
@@ -37,6 +40,50 @@ FrequencyParameter  param_osc_3_pitch                       = FrequencyParameter
 /*Parameter           param_osc_1_waveforms                   = Parameter<Voice,double> ("Osc 1 wave", &sid.voice[0], &Voice::setOsc);
 Parameter           param_osc_2_waveforms                   = Parameter<Voice,double> ("Osc 2 wave", &sid.voice[1], &Voice::setOsc);
 Parameter           param_osc_3_waveforms                   = Parameter<Voice,double> ("Osc 3 wave", &sid.voice[2], &Voice::setOsc);*/
+
+LinkedList<VoltageSourceBase*> voltage_sources = LinkedList<VoltageSourceBase*> ();
+
+#ifdef ADS24V
+    #define ADSCLASS    ADS1015
+    #define MAX_INPUT_VOLTAGE 10.0
+    ADSCLASS ADS_OBJECT_1(0x48);
+    //ADS1015 ADS_OBJECT_2(0x49);
+#else
+    #define ADSCLASS    ADS1115
+    #define MAX_INPUT_VOLTAGE 5.0
+    ADSCLASS ADS_OBJECT_1(0x48);
+#endif
+
+ADSVoltageSource<ADSCLASS> voltage_source_1_channel_0 = ADSVoltageSource<ADSCLASS>(&ADS_OBJECT_1, 0, MAX_INPUT_VOLTAGE);
+ADSVoltageSource<ADSCLASS> voltage_source_1_channel_1 = ADSVoltageSource<ADSCLASS>(&ADS_OBJECT_1, 1, MAX_INPUT_VOLTAGE);
+ADSVoltageSource<ADSCLASS> voltage_source_1_channel_2 = ADSVoltageSource<ADSCLASS>(&ADS_OBJECT_1, 2, MAX_INPUT_VOLTAGE);
+
+/*ADSVoltageSource<ADS1015> source_2_channel_0 = ADSVoltageSource<ADS1015>(&ADS_OBJECT_2, 0);
+ADSVoltageSource<ADS1015> source_2_channel_1 = ADSVoltageSource<ADS1015>(&ADS_OBJECT_2, 1);
+ADSVoltageSource<ADS1015> source_2_channel_2 = ADSVoltageSource<ADS1015>(&ADS_OBJECT_2, 2);*/
+
+void setup_voltage_sources() {
+    ADS_OBJECT_1.begin();
+    #ifdef ADS24V
+        ADS_OBJECT_1.setGain(2);
+    #else
+        ADS_OBJECT_1.setGain(0);
+    #endif
+
+    voltage_sources.add(&voltage_source_1_channel_0);
+    voltage_sources.add(&voltage_source_1_channel_1);
+    voltage_sources.add(&voltage_source_1_channel_2);
+
+    /*voltage_sources.add(&source_2_channel_0);
+    voltage_sources.add(&source_2_channel_1);
+    voltage_sources.add(&source_2_channel_2);*/
+}
+
+void update_voltage_sources() {
+    for (int i = 0 ; i < voltage_sources.size() ; i++) {
+        voltage_sources.get(i)->update();
+    }
+}
 
 void add_voice_parameters(LinkedList<DataParameter*> *available_parameters, int voice_number) {
     char label[40] = "            ";
@@ -91,22 +138,12 @@ void add_voice_parameters(LinkedList<DataParameter*> *available_parameters, int 
 // ParameterInputs, ie wrappers around input mechanism, assignable to a Parameter
 LinkedList<BaseParameterInput*> available_inputs            = LinkedList<BaseParameterInput*>();
 
-/*ADSParameterInput<ADS1115,Parameter<SID6581,double>> input_A = ADSParameterInput<ADS1115,Parameter<SID6581,double>>(&ADS_OBJECT, 0, &param_overall_pitch);
-ADSParameterInput<ADS1115,Parameter<SID6581,double>> input_B = ADSParameterInput<ADS1115,Parameter<SID6581,double>>(&ADS_OBJECT, 0); //&param_overall_pulsewidth_modulation);
-ADSParameterInput<ADS1115,Parameter<SID6581,double>> input_C = ADSParameterInput<ADS1115,Parameter<SID6581,double>>(&ADS_OBJECT, 0); //&param_filter_cutoff);*/
-ADSParameterInput<ADS1115,BaseParameter> input_A = ADSParameterInput<ADS1115,BaseParameter>('A', &ADS_OBJECT, 0); //, &param_overall_pitch);
-ADSParameterInput<ADS1115,BaseParameter> input_B = ADSParameterInput<ADS1115,BaseParameter>('B', &ADS_OBJECT, 0); //&param_overall_pulsewidth_modulation);
-ADSParameterInput<ADS1115,BaseParameter> input_C = ADSParameterInput<ADS1115,BaseParameter>('C', &ADS_OBJECT, 1); //&param_filter_cutoff);
-ADSParameterInput<ADS1115,BaseParameter> input_D = ADSParameterInput<ADS1115,BaseParameter>('D', &ADS_OBJECT, 1); //&param_filter_cutoff);
-
-/*ADSParameterInput<ADS1115,Parameter<Voice,double>> input_D = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_1_pitch);
-ADSParameterInput<ADS1115,Parameter<Voice,double>> input_E = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_2_pitch);
-ADSParameterInput<ADS1115,Parameter<Voice,double>> input_F = ADSParameterInput<ADS1115,Parameter<Voice,double>>(&ADS_OBJECT, 1, &param_osc_3_pitch);*/
-
-ADSParameterInput<ADS1115,BaseParameter> input_E = ADSParameterInput<ADS1115,BaseParameter>('E', &ADS_OBJECT, 2); //, &param_overall_pulsewidth_modulation); //, &param_osc_1_pitch);
-ADSParameterInput<ADS1115,BaseParameter> input_F = ADSParameterInput<ADS1115,BaseParameter>('F', &ADS_OBJECT, 2); //, &param_osc_2_pitch);
-ADSParameterInput<ADS1115,BaseParameter> input_G = ADSParameterInput<ADS1115,BaseParameter>('G', &ADS_OBJECT, 3); //, &param_osc_3_pitch);
-ADSParameterInput<ADS1115,BaseParameter> input_H = ADSParameterInput<ADS1115,BaseParameter>('H', &ADS_OBJECT, 3); //, &param_osc_3_pitch);
+VoltageParameterInput<BaseParameter> input_A = VoltageParameterInput<BaseParameter>('A', &voltage_source_1_channel_0);
+VoltageParameterInput<BaseParameter> input_B = VoltageParameterInput<BaseParameter>('B', &voltage_source_1_channel_0);
+VoltageParameterInput<BaseParameter> input_C = VoltageParameterInput<BaseParameter>('C', &voltage_source_1_channel_1);
+VoltageParameterInput<BaseParameter> input_D = VoltageParameterInput<BaseParameter>('D', &voltage_source_1_channel_1);
+VoltageParameterInput<BaseParameter> input_E = VoltageParameterInput<BaseParameter>('E', &voltage_source_1_channel_2);
+VoltageParameterInput<BaseParameter> input_F = VoltageParameterInput<BaseParameter>('F', &voltage_source_1_channel_2);
 
 // menu item for direct control over a Parameter via menu
 //ParameterMenuItem PulseWidthModulationPanel("Pulse width mod", &param_overall_pulsewidth_modulation);
@@ -159,7 +196,7 @@ void setup_parameters() {
     add_voice_parameters(&available_parameters, 2);    
 
     input_D.setInverted();
-    input_H.setInverted();
+    //input_H.setInverted();
 
     input_D.map_unipolar = true;    
 
@@ -169,8 +206,8 @@ void setup_parameters() {
     available_inputs.add(&input_D);
     available_inputs.add(&input_E);
     available_inputs.add(&input_F);
-    available_inputs.add(&input_G);        
-    available_inputs.add(&input_H);
+    //available_inputs.add(&input_G);        
+    //available_inputs.add(&input_H);
 
     Serial.println("==== end setup_parameters ====");
 }
