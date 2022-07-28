@@ -6,6 +6,11 @@
  - CV inputs assignable to SID parameters
 - Using [mymenu](https://github.com/doctea/mymenu) and [parameters](https://github.com/doctea/parameters)
 
+## Hardware/PCB
+
+- See [Wiring.md](Wiring.md) for pin wiring (unchecked / incomplete / untested!!)
+- Note that **PCB FILES in pcb/ ARE NOT FINISHED, DO NOT USE THESE YET!!**
+
 ## Todo
 
 - Parameters
@@ -25,24 +30,31 @@
   - Filter on/off for oscillator 3
   - Filter modes LP / BP / HP
   - Filter cutoff
-  - Quantization settings
+  - Pitch Quantization settings
 - Use SID ADSR?
   - optional so module can just be used as an oscillator
   - otherwise have ADSR for each oscillator be configurable?
-- Menu system (using https://github.com/doctea/mymenu)
- - Input via rotary encoder + buttons
+- ~~Menu system (using https://github.com/doctea/mymenu)~~
+ - ~~Input via rotary encoder + buttons~~
    - (unreliably working with straight encoder)
-   - todo: i2c rotary encoder
- - System to map assignable inputs to parameters
-- Display via i2c ss_oled
+   - ~~todo: i2c rotary encoder~~
+ - ~~System to map assignable inputs to parameters~~
+- ~~Display via i2c ss_oled~~
 - CV inputs
   - Pitch
     - (working for 0-5v, quantised and not)
-    - tuning / calibration
-    - three of them for each oscillator?
+    - Make work with 2xPimoroni 24v ADS1015 breakouts
+    - tuning / calibration functions
+    - ~~three of them, one for each oscillator?~~
+    - pitch modulation
+    - portamento/glide
   - Filter cutoff
   - Assignable input?
-- LFOs etc
+- internal LFOs?
 - MIDI input
-- Schematic
-- PCB + panel
+- Circuit
+  - Schematic
+    - in progress in pcb/
+  - PCB
+    - in progress in pcb/
+- Panel
