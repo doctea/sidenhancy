@@ -21,7 +21,6 @@
 
 LinkedList<VoltageSourceBase*> voltage_sources = LinkedList<VoltageSourceBase*> ();
 
-
 /////// PARAMETER INPUTS & VOLTAGE SOURCES
 
 #define ENABLE_ADS_24V

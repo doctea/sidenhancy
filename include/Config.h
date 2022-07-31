@@ -15,5 +15,3 @@
 //#define PIN_BUTTON_A        PIN_ENCODER_BUTTON
 #define PIN_BUTTON_B        PIN_PC7
 //#define ENCODER_STEP_DIVISOR    4   // needs to be 4 on usb_midi_clocker on teensy, 1 on my sid prototype, not sure why?
-
-//#define RESTORE_PARAMETER_INPUT_PROPERTIES
