@@ -2,6 +2,9 @@
 // indicator LED
 #define PIN_LED     PIN_PD4
 
+#define PIN_SDA     PIN_PB4
+#define PIN_SCL     PIN_PB2
+
 #define ENABLE_SCREEN
 #define OLED_ADDR -1
 #define TFT_SSOLED
