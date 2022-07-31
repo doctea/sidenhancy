@@ -1,23 +1,26 @@
 #include "sid6581.h"
 
+#include "Config.h"
+
 #include "ads.h"
 
-#include "VoltageSource.h"
-#include "ADSVoltageSource.h"
-#include "ADS24vVoltageSource.h"
+#include "voltage_sources/VoltageSource.h"
+#include "voltage_sources/ADSVoltageSource.h"
+#include "voltage_sources/ADS24vVoltageSource.h"
 
-#include "FrequencyParameter.h"
-#include "ToggleParameter.h"
+#include "parameters/FrequencyParameter.h"
+#include "parameters/ToggleParameter.h"
 
 //#include "ParameterInput.h"
-#include "VoltageParameterInput.h"
+#include "parameter_inputs/VoltageParameterInput.h"
 
 #include "mymenu.h"
-#include "ParameterMenuItems.h"
-#include "ToggleMenuItems.h"
+#include "mymenu_items/ParameterMenuItems.h"
+#include "mymenu_items/ToggleMenuItems.h"
 
 #include "LinkedList.h"
 
+#include "ADS1X15.h"
 
 LinkedList<VoltageSourceBase*> voltage_sources = LinkedList<VoltageSourceBase*> ();
 
@@ -44,7 +47,9 @@ LinkedList<VoltageSourceBase*> voltage_sources = LinkedList<VoltageSourceBase*> 
 #endif
 
 void setup_voltage_sources() {
+    Serial.println("setup_voltage_sources...");
     #ifdef ENABLE_ADS_x48
+        Serial.println("Beginning ADS_x48..");
         ADS_OBJECT_x48.begin();
         ADS_OBJECT_x48.setGain(0);
         voltage_sources.add(&voltage_source_2_channel_0);
@@ -54,12 +59,14 @@ void setup_voltage_sources() {
     #endif
     
     #ifdef ENABLE_ADS_24V
+    Serial.println("Beginning ADS_24V..");
         ADS_OBJECT_24V.begin();
         ADS_OBJECT_24V.setGain(2);
         voltage_sources.add(&voltage_source_1_channel_0);
         voltage_sources.add(&voltage_source_1_channel_1);
         voltage_sources.add(&voltage_source_1_channel_2);
     #endif
+    Serial.println("done setup_voltage_sources!");
 }
 
 void update_voltage_sources() {

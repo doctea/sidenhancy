@@ -3,8 +3,8 @@
 
 #include "ads.h"
 
-#include "Parameter.h"
-#include "ParameterInput.h"
+#include "parameters/Parameter.h"
+#include "parameter_inputs/ParameterInput.h"
 #include <LinkedList.h>
 
 void setup_parameters();

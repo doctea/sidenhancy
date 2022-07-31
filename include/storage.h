@@ -3,8 +3,8 @@
 
 #include "Adafruit_EEPROM_I2C.h"
 #include <LinkedList.h>
-#include "Parameter.h"
-#include "ParameterInput.h"
+#include "parameters/Parameter.h"
+#include "parameter_inputs/ParameterInput.h"
 
 extern Adafruit_EEPROM_I2C i2ceeprom;
 

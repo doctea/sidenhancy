@@ -1,8 +1,8 @@
 #include "storage.h"
 
 #include <LinkedList.h>
-#include "Parameter.h"
-#include "ParameterInput.h"
+#include "parameters/Parameter.h"
+#include "parameter_inputs/ParameterInput.h"
 
 #include "Config.h"
 
