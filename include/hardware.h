@@ -136,7 +136,7 @@ class Socket {
     }
 
     // write a register to the SID
-    void write(byte addr, byte data, char *msg = "") {
+    void write(byte addr, byte data, const char *msg = "") {
         //if (debug) 
         if ((byte)last_written[addr]!=data) {
             if (debug) Serial.printf(F("Writing to\t%i\t[%02x]: " BYTE_TO_BINARY_PATTERN "\t[%02X] :: %s\n"), addr, addr, BYTE_TO_BINARY(data), data, msg);

@@ -35,3 +35,9 @@ wtf/*
 lib/*
 .pio
 .vscode
+
+*bak
+*cache
+*_autosave*
+
+*lib-table*
