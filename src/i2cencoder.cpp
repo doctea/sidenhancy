@@ -3,7 +3,7 @@
 
 #include "mymenu.h"
 
-const int IntPin = PIN_PC3;
+const int IntPin = PIN_PC4;
 
 i2cEncoderLibV2 Encoder(0x01); /* A0 is soldered */
 
@@ -50,34 +50,41 @@ void encoder_double_push(i2cEncoderLibV2* obj) {
 }
 
 void setup_encoder() {
-    pinMode(IntPin, INPUT);
+  Serial.println("setup_encoder..."); Serial.flush();
 
-    Encoder.reset();
+  pinMode(IntPin, INPUT);
 
-    Encoder.begin(
-        i2cEncoderLibV2::INT_DATA | i2cEncoderLibV2::WRAP_ENABLE
-        | i2cEncoderLibV2::DIRE_LEFT | i2cEncoderLibV2::IPUP_ENABLE
-        | i2cEncoderLibV2::RMOD_X1 | i2cEncoderLibV2::RGB_ENCODER);
+  Serial.println("\tEncoder.reset().."); Serial.flush();
+  Encoder.reset();
 
-    Encoder.writeCounter((int32_t) 0); /* Reset the counter value */
-    //Encoder.writeMax((int32_t) 10); /* Set the maximum threshold*/
-    //Encoder.writeMin((int32_t) - 10); /* Set the minimum threshold */
-    Encoder.writeStep((int32_t) 1); /* Set the step to 1*/
-    Encoder.writeInterruptConfig(0xff); /* Enable all the interrupt */
-    Encoder.writeAntibouncingPeriod(20); /* Set an anti-bouncing of 200ms */
-    Encoder.writeDoublePushPeriod(50); /*Set a period for the double push of 500ms */
+  Serial.println("\tEncoder.begin().."); Serial.flush();
+  Encoder.begin(
+      i2cEncoderLibV2::INT_DATA | i2cEncoderLibV2::WRAP_ENABLE
+      | i2cEncoderLibV2::DIRE_LEFT | i2cEncoderLibV2::IPUP_ENABLE
+      | i2cEncoderLibV2::RMOD_X1 | i2cEncoderLibV2::RGB_ENCODER);
 
-    // Definition of the events
-    Encoder.onIncrement = encoder_increment;
-    Encoder.onDecrement = encoder_decrement;
-    Encoder.onMax = encoder_max;
-    Encoder.onMin = encoder_min;
-    Encoder.onButtonPush = encoder_push;
-    Encoder.onButtonRelease = encoder_released;
-    Encoder.onButtonDoublePush = encoder_double_push;
+  Serial.println("\tEncoder.writeStuff..."); Serial.flush();
+  Encoder.writeCounter((int32_t) 0); /* Reset the counter value */
+  //Encoder.writeMax((int32_t) 10); /* Set the maximum threshold*/
+  //Encoder.writeMin((int32_t) - 10); /* Set the minimum threshold */
+  Encoder.writeStep((int32_t) 1); /* Set the step to 1*/
+  Encoder.writeInterruptConfig(0xff); /* Enable all the interrupt */
+  Encoder.writeAntibouncingPeriod(20); /* Set an anti-bouncing of 200ms */
+  //Encoder.writeDoublePushPeriod(50); /*Set a period for the double push of 500ms */
 
-    /* Enable the I2C Encoder V2 interrupts according to the previus attached callback */
-    Encoder.autoconfigInterrupt();
+  // Definition of the events
+  Encoder.onIncrement = encoder_increment;
+  Encoder.onDecrement = encoder_decrement;
+  Encoder.onMax = encoder_max;
+  Encoder.onMin = encoder_min;
+  Encoder.onButtonPush = encoder_push;
+  Encoder.onButtonRelease = encoder_released;
+  Encoder.onButtonDoublePush = encoder_double_push;
+
+  /* Enable the I2C Encoder V2 interrupts according to the previus attached callback */
+  Serial.println("\tEncoder.autoconfigInterrupt().."); Serial.flush();
+  Encoder.autoconfigInterrupt();
+  Serial.println("... finished setup_encoder"); Serial.flush();
 }
 
 void update_encoder() {

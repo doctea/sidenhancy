@@ -102,7 +102,10 @@ void load_default_settings() {
 ActionItem save_settings = ActionItem("Save settings", &save_current_settings);
 
 void setup_menu() {
-    setup_encoder();
+
+    #ifdef ENABLE_ENCODER
+        setup_encoder();
+    #endif
 
     #ifdef PIN_BUTTON_A
         pinMode(PIN_BUTTON_A, INPUT_PULLUP);

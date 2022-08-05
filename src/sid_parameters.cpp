@@ -26,9 +26,6 @@ LinkedList<VoltageSourceBase*> voltage_sources = LinkedList<VoltageSourceBase*> 
 
 /////// PARAMETER INPUTS & VOLTAGE SOURCES
 
-#define ENABLE_ADS_24V
-#define ENABLE_ADS_x48
-
 #ifdef ENABLE_ADS_24V
     #define MAX_INPUT_VOLTAGE_24V 10.0
     ADS1015 ADS_OBJECT_24V(0x49);
@@ -56,23 +53,43 @@ void setup_voltage_sources() {
         voltage_sources.add(&voltage_source_2_channel_1);
         voltage_sources.add(&voltage_source_2_channel_2);
         voltage_sources.add(&voltage_source_2_channel_3);
+        Serial.println("..done ADS_x48");
     #endif
     
     #ifdef ENABLE_ADS_24V
-    Serial.println("Beginning ADS_24V..");
+        Serial.println("Beginning ADS_24V..");
         ADS_OBJECT_24V.begin();
         ADS_OBJECT_24V.setGain(2);
         voltage_sources.add(&voltage_source_1_channel_0);
         voltage_sources.add(&voltage_source_1_channel_1);
         voltage_sources.add(&voltage_source_1_channel_2);
+        voltage_source_1_channel_0.correction_value_1 = 1180.0;
+        //voltage_source_1_channel_0.debug = true;
+        //voltage_source_1_channel_1.debug = true;
+        //voltage_source_1_channel_2.debug = true;
+        Serial.println("..done ADS_24V");
     #endif
     Serial.println("done setup_voltage_sources!");
 }
 
 void update_voltage_sources() {
-    for (int i = 0 ; i < voltage_sources.size() ; i++) {
+    // round robin reading so they get a chance to settle in between adc reads?
+    int size = voltage_sources.size();
+    if (size==0) return;
+
+    static int last_read = 0;
+    voltage_sources.get(last_read)->update();
+    last_read++;
+    
+    if (last_read>=size)
+        last_read = 0;
+
+    voltage_sources.get(last_read)->update();   // pre-read the next one so it has a chance to settle?
+
+
+    /*for (int i = 0 ; i < voltage_sources.size() ; i++) {
         voltage_sources.get(i)->update();
-    }
+    }*/
 }
 
 // ParameterInputs, ie wrappers around input mechanism, assignable to a Parameter

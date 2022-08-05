@@ -6,7 +6,7 @@
 
 #include "sid_parameters.h"
 
-#ifdef STORAGE
+#ifdef ENABLE_STORAGE
   #include "storage.h"
 #endif
 
@@ -59,7 +59,7 @@ void setup() {
     setup_parameters();
     Serial.println(F("Parameter setup done!"));
 
-    #ifdef STORAGE
+    #ifdef ENABLE_STORAGE
       setup_storage();
     #endif
 
@@ -242,7 +242,11 @@ void loop() {
     }
   #endif
 
-  update_voltage_sources();
+  //static unsigned long last_milli = 0;
+  //if (millis()!=last_milli) {
+    update_voltage_sources();
+    //last_milli = millis();
+  //}
 
   while(Serial.available()) {
     char i = Serial.read();
