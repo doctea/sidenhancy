@@ -1,6 +1,6 @@
 #define ENABLE_STORAGE
 
-
+//#define LOAD_PARAMETER_SETTINGS
 
 // indicator LED
 #define PIN_LED     PIN_PD4

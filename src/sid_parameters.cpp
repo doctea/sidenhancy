@@ -99,45 +99,45 @@ LinkedList<BaseParameterInput*> available_inputs            = LinkedList<BasePar
 // Parameters, ie wrappers around destination object
 LinkedList<DataParameter*>      available_parameters    = LinkedList<DataParameter*>();
 
-DataParameter       param_none                              = DataParameter("None");
-FrequencyParameter  param_overall_pitch                     = FrequencyParameter<SID6581,double> ("Overall pitch", &sid, 0.0, &SID6581::setAllFrequency);
-Parameter           param_overall_pulsewidth_modulation     = Parameter<SID6581,double> ("Overall PW Mod", &sid, 0.0, &SID6581::modulateAllPulseWidths);
-Parameter           param_overall_pitch_modulation          = Parameter<SID6581,double> ("Overall Pitch Mod", &sid, 0.0, &SID6581::modulateAllPitches);
+DataParameter       param_none                              = DataParameter((char*)"None");
+FrequencyParameter  param_overall_pitch                     = FrequencyParameter<SID6581,double> ((char*)"Overall pitch", &sid, 0.0, &SID6581::setAllFrequency);
+Parameter           param_overall_pulsewidth_modulation     = Parameter<SID6581,double> ((char*)"Overall PW Mod", &sid, 0.0, &SID6581::modulateAllPulseWidths);
+Parameter           param_overall_pitch_modulation          = Parameter<SID6581,double> ((char*)"Overall Pitch Mod", &sid, 0.0, &SID6581::modulateAllPitches);
 
-Parameter           param_filter_cutoff                     = Parameter<SID6581,double> ("Filter cutoff", &sid, 0.0, &SID6581::setCutoff);
-Parameter           param_filter_resonance                  = Parameter<SID6581,double> ("Filter res", &sid, 0.0, &SID6581::setResonanceD);
+Parameter           param_filter_cutoff                     = Parameter<SID6581,double> ((char*)"Filter cutoff", &sid, 0.0, &SID6581::setCutoff);
+Parameter           param_filter_resonance                  = Parameter<SID6581,double> ((char*)"Filter res", &sid, 0.0, &SID6581::setResonanceD);
 
-ToggleParameter     param_filter_lowpass   = ToggleParameter<SID6581,bool> ("Filter LP", &sid, sid.isFilterTypeLP(), &SID6581::setFilterTypeLP);
-ToggleParameter     param_filter_bandpass  = ToggleParameter<SID6581,bool> ("Filter BP", &sid, sid.isFilterTypeBP(), &SID6581::setFilterTypeBP);
-ToggleParameter     param_filter_highpass  = ToggleParameter<SID6581,bool> ("Filter HP", &sid, sid.isFilterTypeHP(), &SID6581::setFilterTypeHP);
-ToggleParameter     param_filter_off3      = ToggleParameter<SID6581,bool> ("Filter Off3", &sid, sid.isFilterTypeOff3(), &SID6581::setFilterTypeOff3);
+ToggleParameter     param_filter_lowpass   = ToggleParameter<SID6581,bool> ((char*)"Filter LP", &sid, sid.isFilterTypeLP(), &SID6581::setFilterTypeLP);
+ToggleParameter     param_filter_bandpass  = ToggleParameter<SID6581,bool> ((char*)"Filter BP", &sid, sid.isFilterTypeBP(), &SID6581::setFilterTypeBP);
+ToggleParameter     param_filter_highpass  = ToggleParameter<SID6581,bool> ((char*)"Filter HP", &sid, sid.isFilterTypeHP(), &SID6581::setFilterTypeHP);
+ToggleParameter     param_filter_off3      = ToggleParameter<SID6581,bool> ((char*)"Filter Off3", &sid, sid.isFilterTypeOff3(), &SID6581::setFilterTypeOff3);
 
 void add_voice_parameters(LinkedList<DataParameter*> *available_parameters, int voice_number) {
     char label[40] = "            ";
     Voice *voice = &sid.voice[voice_number];
     ToggleParameter<Voice,bool> *param;
 
-    sprintf(label, "Osc %i %s", voice_number+1, "Triangle");
+    sprintf(label, "Osc %i %s", voice_number+1, (char*)"Triangle");
     param = new ToggleParameter<Voice,bool>(label, voice, voice->isWaveform(ENVOSC::triMask), &Voice::toggleTri); //triOn, &Voice::triOff);
     available_parameters->add(param);
 
-    sprintf(label, "Osc %i %s", voice_number+1, "Pulse");
+    sprintf(label, "Osc %i %s", voice_number+1, (char*)"Pulse");
     param = new ToggleParameter<Voice,bool>(label, voice, voice->isWaveform(ENVOSC::pulseMask), &Voice::togglePulse); //&Voice::pulseOff);
     available_parameters->add(param);
 
-    sprintf(label, "Osc %i %s", voice_number+1, "Saw");    
+    sprintf(label, "Osc %i %s", voice_number+1, (char*)"Saw");    
     param = new ToggleParameter<Voice,bool>(label, voice, voice->isWaveform(ENVOSC::sawMask), &Voice::toggleSaw); //&Voice::sawOff);
     available_parameters->add(param);
 
-    sprintf(label, "Osc %i %s", voice_number+1, "Noise");
+    sprintf(label, "Osc %i %s", voice_number+1, (char*)"Noise");
     param = new ToggleParameter<Voice,bool>(label, voice, voice->isWaveform(ENVOSC::noiseMask), &Voice::toggleNoise);    
     available_parameters->add(param);
 
-    sprintf(label, "Osc %i %s", voice_number+1, "Ring");
+    sprintf(label, "Osc %i %s", voice_number+1, (char*)"Ring");
     param = new ToggleParameter<Voice,bool>(label, voice, voice->isWaveform(ENVOSC::ringMask), &Voice::toggleRing);    
     available_parameters->add(param);
 
-    sprintf(label, "Osc %i %s", voice_number+1, "Sync");
+    sprintf(label, "Osc %i %s", voice_number+1, (char*)"Sync");
     param = new ToggleParameter<Voice,bool>(label, voice, voice->isWaveform(ENVOSC::ringMask), &Voice::toggleRing);    
     available_parameters->add(param);
 
@@ -145,18 +145,18 @@ void add_voice_parameters(LinkedList<DataParameter*> *available_parameters, int 
     FrequencyParameter<Voice,double> *param_freq = new FrequencyParameter<Voice,double> (label, voice, &Voice::setFrequency);
     available_parameters->add(param_freq);*/
 
-    sprintf(label, "Osc %i %s", voice_number+1, "Pitch Mod");
+    sprintf(label, "Osc %i %s", voice_number+1, (char*)"Pitch Mod");
     Parameter<Voice,double> *pitch_freq = new Parameter<Voice,double> (label, voice, &Voice::modulatePitch, &Voice::getPitchMod);
     available_parameters->add(pitch_freq);
 
-    sprintf(label, "Osc %i %s", voice_number+1, "PW Mod");
+    sprintf(label, "Osc %i %s", voice_number+1, (char*)"PW Mod");
     DataParameter *param3 = (new Parameter<Voice,double> (label, voice, &Voice::modulatePulseWidth, &Voice::getModulatedPulseWidth))
-                            ->initialise_values(NULL,0,4095);
+                            ->initialise_values(0,4095);
     available_parameters->add(param3);
 
-    sprintf(label, "Osc %i %s", voice_number+1, "Freq mult");
+    sprintf(label, "Osc %i %s", voice_number+1, (char*)"Freq mult");
     DataParameter *param2 = (new Parameter<Voice,double> (label, voice, &Voice::setFrequencyMultiplier, &Voice::getFrequencyMultiplier))
-                            ->initialise_values(NULL,0,400);
+                            ->initialise_values(0,400);
     //param2->minimum_value = 0.0;
     //param2->maximum_value = 400; // actually 4x?
     available_parameters->add(param2);

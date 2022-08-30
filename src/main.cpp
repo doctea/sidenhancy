@@ -28,7 +28,9 @@ SID6581 sid = SID6581();
 void setup() {
     Serial.begin(115200);
     Serial.println(F("\n\n\n======================= sidenhancy starting up! >>>>>>>>>>>>>>>>>>>>>\n"));
-    //while (!Serial);
+    #ifdef WAIT_FOR_SERIAL
+      while (!Serial);
+    #endif
     // todo: MIDI on Serial1
 
     pinMode(PIN_LED, OUTPUT);
@@ -64,7 +66,9 @@ void setup() {
     #endif
 
     //save_parameter_settings(&available_parameters, &available_inputs, DEFAULT_SLOT);
-    load_parameter_settings(&available_parameters, &available_inputs, 0); // restore previous settings
+    #ifdef LOAD_PARAMETER_SETTINGS
+      load_parameter_settings(&available_parameters, &available_inputs, 0); // restore previous settings
+    #endif
 
     #ifdef ENABLE_SCREEN
       setup_parameter_menu();
@@ -74,98 +78,6 @@ void setup() {
 
     Serial.println(F("exiting setup()\n\n"));
 }
-
-
-void unused_loop() {
-  /*sid.playNote(2, 38);
-  delay(1000);
-  sid.stopNote(2);
-  delay(1000);
-  sid.playNote(2, 39);
-  delay(1000);
-  sid.stopNote(2);
-  delay(1000);
-  sid.playNote(2, 40);
-  delay(1000);
-  sid.stopNote(2);
-  delay(1000);
-  sid.playNote(2, 41);
-  delay(1000);
-  sid.stopNote(2);
-  delay(1000);
-  sid.playNote(2, 42);
-  delay(1000);
-  sid.stopNote(2);
-  delay(1000);
-  sid.playNote(2, 43);
-  delay(1000);
-  sid.stopNote(2);
-  delay(1000);
-  sid.playNote(2, 44);
-  delay(1000);
-  sid.stopNote(2);
-  delay(1000);
-  sid.playNote(2, 45);
-  delay(1000);
-  sid.stopNote(2);
-  delay(1000);
-  sid.playNote(2, 46);
-  delay(1000);
-  sid.stopNote(2);
-  delay(1000);*/
-
-  sid.playNote(2,40);
-  delay(1000);
-  sid.playNote(2,41);
-  delay(1000);
-  sid.playNote(2,42);
-  delay(1000);
-  //sid.stopNote(2);
-  //delay(1000);
-
-}
-
-/*void adc_loop() {
-  static int last_pitch;
-  int pitch = get_midi_pitch_for_voltage(read_voltage(0));
-  if (pitch!=last_pitch) {
-    Serial.printf(F("got pitch %i\n"), pitch);
-    sid.playNote(0,pitch);
-    sid.playNote(1,pitch);
-    sid.playNote(2,pitch);
-  }
-  last_pitch = pitch;
-}*/
-/*
-void adc_direct_freq_loop() {
-  //sid.allGateOn();
-
-  return; 
-  static int last_freq = 0;
-  //Serial.println("adc_direct_freq_loop().."); Serial.flush();
-  int freq = get_frequency_for_voltage(read_voltage(0));
-  //Serial.printf("Read channel 0: %i\n", freq); Serial.flush();
-  //float value2 = read_voltage(1);
-  //Serial.printf(F("voltage: %i (%u)\n"), (value2*100), pulseWidth);
-  //Serial.printf("Read channel 1: %i\n", pulseWidth); Serial.flush();
-  //static int pulseWidth = 0;
-  //pulseWidth+=32;
-
-  if (freq!=last_freq) {
-    //Serial.printf("got freq %i\n", freq);
-    sid.allGateOn();
-    sid.setAllFrequency(freq);
-    last_freq = freq;
-  }
-
-  static uint16_t last_pw = 0;;
-  float pulseWidth = read_voltage(1)/5.0f;
-  if (pulseWidth!=last_pw) {
-    Serial.printf("new pulse width: %i\n", (int) (pulseWidth*100.0));
-    sid.modulateAllPulseWidths(pulseWidth);
-    last_pw = pulseWidth;
-  }
-}*/
 
 void note_loop() {
     //sid.test_tones();
@@ -218,7 +130,7 @@ void led_off() {
 }
 
 void loop() {
-  bool debug = false;
+  bool debug = true;
   static int mode = 0;
   static bool paused = false;
 

@@ -39,7 +39,7 @@ bool load_parameter_settings(LinkedList<BaseParameter*> *parameters, LinkedList<
     unsigned int memory_offset = SLOT_SIZE * memory_slot;
     
     i2ceeprom.read(memory_offset, (uint8_t*)&header, sizeof(header));
-    for (int i = 0 ; i < sizeof(header.magic) ; i++) {
+    for (uint_fast16_t i = 0 ; i < sizeof(header.magic) ; i++) {
         if (header.magic[i]!=magic_header[i]) {
             Serial.printf("ERROR reading memory slot %i from address 0x%02x: Magic header not found! (expected %02x, got %02x at %i)\n",
                                 memory_slot, memory_offset, magic_header[i], header.magic[i], i
@@ -59,7 +59,7 @@ bool load_parameter_settings(LinkedList<BaseParameter*> *parameters, LinkedList<
     ParameterSetting        read_params[num_params_to_read];
     for (int i = 0 ; i < parameters->size() ; i++) {
         i2ceeprom.read(memory_offset, (uint8_t*)&read_params[i], sizeof(ParameterSetting));
-        for (int m = 0 ; m < sizeof(read_params[i].magic) ; m++) {
+        for (uint16_t m = 0 ; m < sizeof(read_params[i].magic) ; m++) {
             if (read_params[i].magic[m] != magic_parameter[m]) {
                 Serial.printf("ERROR reading param %i from address 0x%02x: Magic header not found! (expected 0x%02x, got 0x%02x at %i)\n",
                                     i, memory_offset, magic_parameter[m], read_params[i].magic[m], m
@@ -85,7 +85,7 @@ bool load_parameter_settings(LinkedList<BaseParameter*> *parameters, LinkedList<
     for (int i = 0 ; i < inputs->size() ; i++) {
         i2ceeprom.read(memory_offset, (uint8_t*)&read_inputs[i], sizeof(InputParameterSetting));
         bool matchfail = false;
-        for (int m = 0 ; m < sizeof(read_inputs[i].magic) ; m++) {
+        for (uint16_t m = 0 ; m < sizeof(read_inputs[i].magic) ; m++) {
             /*Serial.printf("Reading input %i from address %02x: (expected %02x, got %02x at %i+%i)\n",
                                 i, memory_offset, magic_input[m], read_inputs[i].magic[m], memory_offset, m
             );*/
@@ -197,7 +197,7 @@ void save_parameter_settings(LinkedList<BaseParameter*> *parameters, LinkedList<
     int position = memory_offset;
     if (DEBUG_SAVING) {
         Serial.printf("Writing header to %i: ", position);
-        for (int i = 0 ; i < sizeof(header) ; i++) {
+        for (uint16_t i = 0 ; i < sizeof(header) ; i++) {
             Serial.printf("0x%02x", &header+i);
         }
         Serial.println("---");
@@ -216,7 +216,7 @@ void dump_fram(unsigned int memory_offset, unsigned int total_size) {
     Serial.printf("Reading back, starting at %i...\n", memory_offset);
     char row[9];
     int count = 0;
-    for (int i = memory_offset ; i < memory_offset+total_size; i++) {
+    for (uint16_t i = memory_offset ; i < memory_offset+total_size; i++) {
         int v = i2ceeprom.read(i);
         if (v>=0x20 && v<=0x7E) {
             row[count%8] = v; 
