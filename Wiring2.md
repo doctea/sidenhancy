@@ -10,9 +10,9 @@
 	  SPI Mosi PB5 [ 6] -      - [35] PA5 to SID_D2
 	  SPI Miso PB6 [ 7] -      - [34] PA6 to SID_D1
 	   SPI Sck PB7 [ 8] -      - [33] PA7 to SID_D0
-	        Reset  [ 9] -      - [32] AREF
+FTDI 1 to 1uf to Reset [ 9] -      - [32] AREF +5v
 	 +5v VCC       [10] -      - [31] GND
-	 GND           [11] -      - [30] AVCC
+	 GND           [11] -      - [30] AVCC +5v
 	 Xtal2         [12] -      - [29] PC7 to PIN_BUTTON_B
 	 Xtal1         [13] -      - [28] PC6 to SID_A4
 	 RxD0      PD0 [14] -      - [27] PC5 to SID_A3
@@ -41,3 +41,12 @@
 	     PC6 to A4 [13] -      - [16] SID_D1 to PA6
 	           GND [14] -      - [15] SID_D0 to PA7
 
+## FTDI
+
+	[1] -> 0.1uf cap --> resistor -> +5v
+		         \__ 1284 reset pin 9
+	[2] -> MIDI_TX
+	[3] -> MIDI_RX
+	[4] -> +5v
+	[5]
+	[6] -> gnd
